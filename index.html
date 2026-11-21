@@ -198,6 +198,9 @@
   <!-- ========================================== -->
   <!-- 模式 3：電腦後台數據儀表板 & 免費 LINE 選單  -->
   <!-- ========================================== -->
+<button type="button" onclick="lockAdminMode()" class="text-xs px-3 py-1.5 rounded-lg border border-earth bg-warm-cream hover:bg-stone-200 text-stone-700 font-medium transition">
+  🔒 鎖定後台
+</button>
   <main id="view-admin" class="hidden flex-1 max-w-7xl w-full mx-auto px-4 py-8 space-y-6">
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="bg-white p-5 rounded-2xl border border-earth shadow-sm">
@@ -426,7 +429,8 @@
       formData.append('file', blobOrUrl, `${treeId}_${Date.now()}.jpg`);
       formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
       formData.append('folder', `kunxiang/${treeId}`);
-
+const ADMIN_PASSCODE = 'kunxiang2026'; // 可自行修改為你的管理密碼
+    let isAdminUnlocked = sessionStorage.getItem('kx_admin_unlocked') === '1';
       const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
         method: 'POST',
         body: formData
@@ -534,17 +538,37 @@
       }
     }
 
-    function switchMode(mode) {
+function switchMode(mode) {
+      if (mode === 'admin' && !isAdminUnlocked) {
+        const inputCode = prompt('請輸入崑祥農產行後台管理密碼：');
+        if (inputCode === null) return;
+        if (inputCode !== ADMIN_PASSCODE) {
+          alert('管理密碼錯誤，無法進入後台。');
+          return;
+        }
+        isAdminUnlocked = true;
+        sessionStorage.setItem('kx_admin_unlocked', '1');
+      }
+
       ['storefront', 'mobile', 'admin'].forEach(m => {
-        document.getElementById('view-' + m).classList.add('hidden');
-        document.getElementById('btn-' + m).className = 'px-3 py-1.5 rounded-md font-medium text-stone-200 hover:bg-white/10 transition';
+        const viewEl = document.getElementById('view-' + m);
+        const btnEl = document.getElementById('btn-' + m);
+        if (viewEl) viewEl.classList.add('hidden');
+        if (btnEl) btnEl.className = 'px-3 py-1.5 rounded-md font-medium text-stone-200 hover:bg-white/10 transition';
       });
-      document.getElementById('view-' + mode).classList.remove('hidden');
-      document.getElementById('btn-' + mode).className = 'px-3 py-1.5 rounded-md font-medium bg-amber-500 text-stone-900 transition';
+      const targetView = document.getElementById('view-' + mode);
+      const targetBtn = document.getElementById('btn-' + mode);
+      if (targetView) targetView.classList.remove('hidden');
+      if (targetBtn) targetBtn.className = 'px-3 py-1.5 rounded-md font-medium bg-amber-500 text-stone-900 transition';
       if (mode === 'mobile') renderMobileSelect();
       if (mode === 'admin') renderAdminDashboard();
     }
 
+    function lockAdminMode() {
+      isAdminUnlocked = false;
+      sessionStorage.removeItem('kx_admin_unlocked');
+      switchMode('storefront');
+    }
     function renderStorefrontTrees() {
       const grid = document.getElementById('trees-grid');
       grid.innerHTML = '';
