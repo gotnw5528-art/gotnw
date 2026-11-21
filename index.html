@@ -19,16 +19,17 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- 頂部：三端切換體驗列 -->
+  <!-- 頂部：品牌狀態列（2、3 端預設隱藏，僅管理員開啟後顯示） -->
   <div class="sticky top-0 z-50 bg-[#1E3026] text-white shadow-md px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
     <div class="flex items-center gap-2">
       <span id="db-status-badge" class="bg-amber-500 text-stone-900 text-xs font-bold px-2 py-0.5 rounded">雲端連線中...</span>
       <span class="font-bold text-sm md:text-base tracking-wide">崑祥農產行數位管理系統</span>
     </div>
-    <div class="flex gap-1.5 bg-[#2D4739] p-1 rounded-lg text-xs md:text-sm">
+    <div id="staff-mode-switcher" class="hidden flex gap-1.5 bg-[#2D4739] p-1 rounded-lg text-xs md:text-sm">
       <button type="button" onclick="switchMode('storefront')" id="btn-storefront" class="px-3 py-1.5 rounded-md font-medium bg-amber-500 text-stone-900 transition">1. 品牌官網與認養前台</button>
       <button type="button" onclick="switchMode('mobile')" id="btn-mobile" class="px-3 py-1.5 rounded-md font-medium text-stone-200 hover:bg-white/10 transition">2. 手機田間拍照端</button>
       <button type="button" onclick="switchMode('admin')" id="btn-admin" class="px-3 py-1.5 rounded-md font-medium text-stone-200 hover:bg-white/10 transition">3. 電腦後台＋免費LINE選單</button>
+      <button type="button" onclick="hideStaffControls()" class="px-2.5 py-1.5 rounded-md font-medium text-amber-200 hover:bg-white/10 transition" title="隱藏 2、3 端按鈕">隱藏</button>
     </div>
   </div>
 
@@ -149,6 +150,9 @@
           <span class="text-xs bg-amber-500 text-stone-900 font-bold px-2 py-0.5 rounded">田間快速紀錄端・Cloudinary 圖床</span>
           <h2 class="font-bold text-lg mt-1">崑祥果園・隨手拍日誌</h2>
         </div>
+        <button type="button" onclick="lockStaffMode()" class="text-xs px-2.5 py-1 rounded-lg bg-white/15 hover:bg-white/25 text-white transition">
+          🔒 鎖定
+        </button>
       </div>
       <div class="p-5 space-y-4">
         <div>
@@ -233,7 +237,7 @@
               <button type="button" onclick="addNewTree()" class="bg-earth-dark hover:bg-earth-mid text-white text-xs font-bold px-3.5 py-1.5 rounded-lg transition shadow-sm">
                 + 新增指定果樹
               </button>
-              <button type="button" onclick="lockAdminMode()" class="text-xs px-3 py-1.5 rounded-lg border border-earth bg-warm-cream hover:bg-stone-200 text-stone-700 font-medium transition">
+              <button type="button" onclick="lockStaffMode()" class="text-xs px-3 py-1.5 rounded-lg border border-earth bg-warm-cream hover:bg-stone-200 text-stone-700 font-medium transition">
                 🔒 鎖定後台
               </button>
             </div>
@@ -356,7 +360,34 @@
     const CLOUDINARY_UPLOAD_PRESET = 'hso20261121';
 
     const ADMIN_PASSCODE = 'kunxiang2026';
-    let isAdminUnlocked = sessionStorage.getItem('kx_admin_unlocked') === '1';
+    let isStaffUnlocked = sessionStorage.getItem('kx_staff_unlocked') === '1';
+
+    function checkStaffAccess() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('kx') === ADMIN_PASSCODE) {
+        sessionStorage.setItem('kx_staff_visible', '1');
+      }
+      const visible = sessionStorage.getItem('kx_staff_visible') === '1';
+      const switcher = document.getElementById('staff-mode-switcher');
+      if (switcher) {
+        switcher.classList.toggle('hidden', !visible);
+      }
+    }
+
+    function hideStaffControls() {
+      sessionStorage.removeItem('kx_staff_visible');
+      isStaffUnlocked = false;
+      sessionStorage.removeItem('kx_staff_unlocked');
+      const switcher = document.getElementById('staff-mode-switcher');
+      if (switcher) switcher.classList.add('hidden');
+      switchMode('storefront');
+    }
+
+    function lockStaffMode() {
+      isStaffUnlocked = false;
+      sessionStorage.removeItem('kx_staff_unlocked');
+      switchMode('storefront');
+    }
 
     const sbHeaders = {
       'apikey': SUPABASE_KEY,
@@ -485,15 +516,16 @@
     let activeLogIndex = 0;
 
     function switchMode(mode) {
-      if (mode === 'admin' && !isAdminUnlocked) {
-        const inputCode = prompt('請輸入崑祥農產行後台管理密碼：');
+      if ((mode === 'mobile' || mode === 'admin') && !isStaffUnlocked) {
+        const label = mode === 'mobile' ? '手機田間拍照端' : '電腦後台管理';
+        const inputCode = prompt(`請輸入崑祥農產行${label}密碼：`);
         if (inputCode === null) return;
         if (inputCode !== ADMIN_PASSCODE) {
-          alert('管理密碼錯誤，無法進入後台。');
+          alert('管理密碼錯誤，無法進入。');
           return;
         }
-        isAdminUnlocked = true;
-        sessionStorage.setItem('kx_admin_unlocked', '1');
+        isStaffUnlocked = true;
+        sessionStorage.setItem('kx_staff_unlocked', '1');
       }
 
       ['storefront', 'mobile', 'admin'].forEach(m => {
@@ -508,12 +540,6 @@
       if (targetBtn) targetBtn.className = 'px-3 py-1.5 rounded-md font-medium bg-amber-500 text-stone-900 transition';
       if (mode === 'mobile') renderMobileSelect();
       if (mode === 'admin') renderAdminDashboard();
-    }
-
-    function lockAdminMode() {
-      isAdminUnlocked = false;
-      sessionStorage.removeItem('kx_admin_unlocked');
-      switchMode('storefront');
     }
 
     function toggleCart(force = null) {
@@ -918,6 +944,7 @@
       box.scrollTop = box.scrollHeight;
     }
 
+    checkStaffAccess();
     loadFromSupabase();
   </script>
 </body>
