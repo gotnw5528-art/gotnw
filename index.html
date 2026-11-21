@@ -146,7 +146,7 @@
     <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border-4 border-stone-800 overflow-hidden">
       <div class="bg-earth-dark text-white px-5 py-4 flex items-center justify-between">
         <div>
-          <span class="text-xs bg-amber-500 text-stone-900 font-bold px-2 py-0.5 rounded">田間快速紀錄端</span>
+          <span class="text-xs bg-amber-500 text-stone-900 font-bold px-2 py-0.5 rounded">田間快速紀錄端・Cloudinary 圖床</span>
           <h2 class="font-bold text-lg mt-1">崑祥果園・隨手拍日誌</h2>
         </div>
       </div>
@@ -157,16 +157,17 @@
           <div id="mobile-tree-owner-hint" class="mt-1.5 text-xs px-3 py-1.5 rounded-lg bg-earth-light text-earth-dark"></div>
         </div>
         <div>
-          <label class="block text-sm font-bold text-earth-dark mb-1.5">2. 拍攝果樹現況照片</label>
+          <label class="block text-sm font-bold text-earth-dark mb-1.5">2. 拍攝果樹現況照片（自動縮圖壓縮）</label>
           <label class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-earth-mid rounded-2xl bg-warm-cream cursor-pointer overflow-hidden relative">
             <img id="mobile-photo-preview" class="hidden w-full h-full object-cover" />
             <div id="mobile-photo-placeholder" class="text-center p-4">
               <div class="text-2xl mb-1">📷</div>
-              <p class="text-xs font-bold text-earth-dark">點擊拍照 / 帶入測試照片</p>
+              <p class="text-xs font-bold text-earth-dark">點擊拍照 / 選擇照片</p>
             </div>
             <input type="file" accept="image/*" capture="environment" onchange="handleMobilePhoto(event)" class="hidden" />
           </label>
-          <button type="button" onclick="useSamplePhoto()" class="mt-1 text-xs text-earth-mid underline">點此帶入田間測試照片</button>
+          <div id="mobile-photo-info" class="mt-1 text-[11px] text-earth-mid">尚未選擇照片</div>
+          <button type="button" onclick="useSamplePhoto()" class="mt-0.5 text-xs text-earth-mid underline">點此帶入田間測試照片</button>
         </div>
         <div>
           <label class="block text-sm font-bold text-earth-dark mb-1.5">3. 田間作業紀錄文字</label>
@@ -176,8 +177,8 @@
             <span>標記為「(客製)」養護紀錄</span>
           </label>
         </div>
-        <button id="submit-log-btn" onclick="submitFieldLog()" class="w-full bg-earth-dark text-white font-bold py-3 rounded-xl shadow-md text-sm transition">
-          確認上傳紀錄（同步存入雲端資料庫）
+        <button id="submit-log-btn" onclick="submitFieldLog()" class="w-full bg-earth-dark hover:bg-earth-mid text-white font-bold py-3 rounded-xl shadow-md text-sm transition">
+          確認上傳紀錄（存至 Cloudinary + Supabase）
         </button>
       </div>
     </div>
@@ -334,8 +335,14 @@
   </div>
 
   <script>
+    // ==========================================
+    // 雲端設定：Supabase + Cloudinary
+    // ==========================================
     const SUPABASE_URL = 'https://isytmyyogdwkugtctmse.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_b5IZ0wyG3NHRsWMnMxhHTw_40qzM848';
+
+    const CLOUDINARY_CLOUD_NAME = 'srw6wwri';
+    const CLOUDINARY_UPLOAD_PRESET = 'hso20261121';
 
     const sbHeaders = {
       'apikey': SUPABASE_KEY,
@@ -351,427 +358,4 @@
     }
 
     async function sbInsert(table, payload) {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, { method: 'POST', headers: sbHeaders, body: JSON.stringify(payload) });
-      if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
-      return await res.json();
-    }
-
-    async function sbUpdate(table, matchQuery, payload) {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${matchQuery}`, { method: 'PATCH', headers: sbHeaders, body: JSON.stringify(payload) });
-      if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
-      return await res.json();
-    }
-
-    const DEFAULT_SEED_TREES = [
-      {
-        id: '無子檸檬01', species: '無子檸檬', customName: '小綠寶', ageYear: 1, owner: '王小明（內測）', isTestVip: true, fruitPref: '綠檸檬',
-        logs: [
-          { date: '2026-11-20', photo: 'https://images.unsplash.com/photo-1587393855524-087f83d95bc9?auto=format&fit=crop&w=900&q=80', text: '施3號肥料(客製)，並混入自製稻殼炭改善根圈透氣。', isCustom: true },
-          { date: '2026-11-12', photo: 'https://images.unsplash.com/photo-1590502593747-42a996133562?auto=format&fit=crop&w=900&q=80', text: '株距中間深埋魚內臟補充天然有機養分，新芽抽出。', isCustom: false },
-          { date: '2026-11-01', photo: 'https://images.unsplash.com/photo-1582979512210-99b6a53386f9?auto=format&fit=crop&w=900&q=80', text: '定植完成與主幹立柱固定，例行灑水養根。', isCustom: false }
-        ]
-      },
-      {
-        id: '無子檸檬02', species: '無子檸檬', customName: '', ageYear: 1, owner: '', isTestVip: false, fruitPref: '',
-        logs: [{ date: '2026-11-15', photo: 'https://images.unsplash.com/photo-1590502593747-42a996133562?auto=format&fit=crop&w=900&q=80', text: '株距間深埋魚內臟有機肥。', isCustom: false }]
-      },
-      {
-        id: '四季檸檬01', species: '四季檸檬', customName: '黃金樹', ageYear: 3, owner: '林雅婷', isTestVip: false, fruitPref: '黃檸檬',
-        logs: [
-          { date: '2026-11-17', photo: 'https://images.unsplash.com/photo-1582979512210-99b6a53386f9?auto=format&fit=crop&w=900&q=80', text: '保留部分果實轉黃(客製)，果皮香氣濃郁。', isCustom: true },
-          { date: '2026-11-05', photo: 'https://images.unsplash.com/photo-1587393855524-087f83d95bc9?auto=format&fit=crop&w=900&q=80', text: '進行疏果與枝條微修剪，讓陽光均勻照射果實。', isCustom: false }
-        ]
-      },
-      {
-        id: '四季金桔01', species: '四季金桔', customName: '', ageYear: 2, owner: '', isTestVip: false, fruitPref: '',
-        logs: [{ date: '2026-11-12', photo: 'https://images.unsplash.com/photo-1611080626919-7cf5a9dbab5b?auto=format&fit=crop&w=900&q=80', text: '進行枝條修剪與除草。', isCustom: false }]
-      },
-      {
-        id: '桑葚01', species: '桑葚', customName: '', ageYear: 1, owner: '', isTestVip: false, fruitPref: '',
-        logs: [{ date: '2026-11-14', photo: 'https://images.unsplash.com/photo-1596591606975-97ee5cef3a1e?auto=format&fit=crop&w=900&q=80', text: '根圈混合稻殼炭與有機質。', isCustom: false }]
-      }
-    ];
-
-    let trees = [];
-    let currentFilter = 'ALL';
-    let currentAdminFilter = 'ALL';
-    let cart = [];
-    let selectedTreeForAdopt = null;
-    let currentMobilePhotoData = '';
-    let activeHistoryTree = null;
-    let activeLogIndex = 0;
-
-    async function loadFromSupabase() {
-      const badge = document.getElementById('db-status-badge');
-      badge.textContent = '雲端同步中...';
-      badge.className = 'bg-amber-500 text-stone-900 text-xs font-bold px-2 py-0.5 rounded';
-
-      try {
-        let treeRows = await sbSelect('trees', '?select=*&order=created_at.asc');
-
-        if (!treeRows || treeRows.length === 0) {
-          for (const seed of DEFAULT_SEED_TREES) {
-            await sbInsert('trees', {
-              id: seed.id, species: seed.species, custom_name: seed.customName,
-              age_year: seed.ageYear, owner: seed.owner, is_test_vip: seed.isTestVip, fruit_pref: seed.fruitPref
-            });
-            for (const log of [...seed.logs].reverse()) {
-              await sbInsert('tree_logs', {
-                tree_id: seed.id, log_date: log.date, photo_url: log.photo, log_text: log.text, is_custom: log.isCustom
-              });
-            }
-          }
-          treeRows = await sbSelect('trees', '?select=*&order=created_at.asc');
-        }
-
-        const logRows = await sbSelect('tree_logs', '?select=*&order=id.desc');
-
-        trees = treeRows.map(r => {
-          const treeLogs = (logRows || [])
-            .filter(l => l.tree_id === r.id)
-            .map(l => ({ date: l.log_date, photo: l.photo_url, text: l.log_text, isCustom: l.is_custom }));
-
-          return {
-            id: r.id, species: r.species, customName: r.custom_name || '',
-            ageYear: r.age_year || 1, owner: r.owner || '', isTestVip: r.is_test_vip || false,
-            fruitPref: r.fruit_pref || '',
-            logs: treeLogs.length > 0 ? treeLogs : [{
-              date: new Date().toISOString().split('T')[0],
-              photo: 'https://images.unsplash.com/photo-1590502593747-42a996133562?auto=format&fit=crop&w=900&q=80',
-              text: '果樹建檔完成。', isCustom: false
-            }]
-          };
-        });
-
-        badge.textContent = 'Supabase 雲端已連線';
-        badge.className = 'bg-emerald-500 text-stone-950 text-xs font-bold px-2 py-0.5 rounded';
-
-        renderStorefrontTrees();
-        renderMobileSelect();
-        renderAdminDashboard();
-      } catch (err) {
-        console.error('Supabase 連線錯誤:', err);
-        badge.textContent = `連線失敗: ${err.message}`;
-        badge.className = 'bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded';
-      }
-    }
-
-    function switchMode(mode) {
-      ['storefront', 'mobile', 'admin'].forEach(m => {
-        document.getElementById('view-' + m).classList.add('hidden');
-        document.getElementById('btn-' + m).className = 'px-3 py-1.5 rounded-md font-medium text-stone-200 hover:bg-white/10 transition';
-      });
-      document.getElementById('view-' + mode).classList.remove('hidden');
-      document.getElementById('btn-' + mode).className = 'px-3 py-1.5 rounded-md font-medium bg-amber-500 text-stone-900 transition';
-      if (mode === 'mobile') renderMobileSelect();
-      if (mode === 'admin') renderAdminDashboard();
-    }
-
-    function renderStorefrontTrees() {
-      const grid = document.getElementById('trees-grid');
-      grid.innerHTML = '';
-      const filtered = currentFilter === 'ALL' ? trees : trees.filter(t => t.species === currentFilter);
-
-      filtered.forEach(tree => {
-        const isAdopted = Boolean(tree.owner);
-        const displayName = isAdopted && tree.customName ? `${tree.customName}（${tree.id}）` : tree.id;
-        const fee = tree.isTestVip ? 0 : (tree.ageYear <= 2 ? 900 : 1800);
-        const latestLog = tree.logs[0];
-
-        const card = document.createElement('div');
-        card.className = 'bg-white rounded-2xl border border-earth overflow-hidden shadow-sm flex flex-col justify-between';
-        card.innerHTML = `
-          <div>
-            <div class="relative h-40 bg-stone-200 cursor-pointer" onclick="openHistoryModal('${tree.id}')">
-              <img src="${latestLog.photo}" class="w-full h-full object-cover hover:scale-105 transition duration-300" />
-              <span class="absolute top-2 left-2 text-[11px] font-bold px-2 py-0.5 rounded-full ${isAdopted ? 'bg-stone-800 text-amber-300' : 'bg-emerald-600 text-white'}">${isAdopted ? '已認養' : '開放認養'}</span>
-              <span class="absolute bottom-2 right-2 bg-black/65 text-white text-[10px] px-2 py-0.5 rounded">共 ${tree.logs.length} 筆紀錄</span>
-            </div>
-            <div class="p-3.5">
-              <div class="text-[11px] text-earth-mid">${tree.species} ・ 第 ${tree.ageYear} 年</div>
-              <h4 class="font-bold text-base text-earth-dark">${displayName}</h4>
-              <p class="text-xs text-stone-600 mt-2 line-clamp-2 bg-warm-cream p-2 rounded border">「${latestLog.text}」</p>
-            </div>
-          </div>
-          <div class="p-3.5 pt-0 space-y-2">
-            <div class="flex justify-between items-center text-xs pt-2 border-t">
-              <span class="text-stone-500">年費</span>
-              <span class="font-bold text-earth-dark">NT$ ${fee}</span>
-            </div>
-            <div class="grid grid-cols-2 gap-1.5">
-              <button onclick="openHistoryModal('${tree.id}')" class="py-1.5 px-1 border border-earth text-earth-dark rounded text-xs font-bold hover:bg-earth-light transition">生長日誌 (${tree.logs.length})</button>
-              ${isAdopted ? '<button disabled class="py-1.5 px-1 bg-stone-200 text-stone-500 rounded text-xs">已認養</button>' : `<button onclick="openAdoptModal('${tree.id}')" class="py-1.5 px-1 bg-earth-dark hover:bg-earth-mid text-white rounded text-xs font-bold transition">認養</button>`}
-            </div>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
-    }
-
-    function filterTrees(species) {
-      currentFilter = species;
-      ['ALL', '無子檸檬', '四季檸檬', '四季金桔', '桑葚'].forEach(s => {
-        document.getElementById('filter-' + s).className = s === species
-          ? 'filter-btn px-3.5 py-1.5 rounded-full bg-earth-dark text-white font-medium transition'
-          : 'filter-btn px-3.5 py-1.5 rounded-full bg-white text-earth-dark border border-earth hover:bg-earth-light transition';
-      });
-      renderStorefrontTrees();
-    }
-
-    function openAdoptModal(treeId) {
-      selectedTreeForAdopt = trees.find(t => t.id === treeId);
-      document.getElementById('modal-tree-code').textContent = selectedTreeForAdopt.id;
-      document.getElementById('modal-custom-name').value = '';
-      document.getElementById('adopt-modal').classList.remove('hidden');
-    }
-    function closeAdoptModal() { document.getElementById('adopt-modal').classList.add('hidden'); }
-
-    function confirmAddToCart() {
-      if (!selectedTreeForAdopt) return;
-      const customName = document.getElementById('modal-custom-name').value.trim();
-      const fruitPref = document.getElementById('modal-fruit-pref').value;
-      const fee = selectedTreeForAdopt.ageYear <= 2 ? 900 : 1800;
-      cart.push({ treeId: selectedTreeForAdopt.id, customName, fruitPref, fee });
-      updateCartUI();
-      closeAdoptModal();
-      toggleCart(true);
-    }
-
-    function toggleCart(force = null) {
-      const drawer = document.getElementById('cart-drawer');
-      if (force === true) drawer.classList.remove('hidden');
-      else drawer.classList.toggle('hidden');
-    }
-
-    function updateCartUI() {
-      document.getElementById('cart-badge').textContent = cart.length;
-      document.getElementById('cart-items').innerHTML = cart.map(i => `<div class="p-2 border rounded bg-warm-cream text-xs"><b>${i.treeId}</b> (${i.customName || '無代號'}) - NT$${i.fee}</div>`).join('') || '<p class="text-xs text-stone-500">清單空空的</p>';
-    }
-
-    async function completeCheckout() {
-      const name = document.getElementById('checkout-owner-name').value.trim();
-      if (!name) return alert('請填寫姓名');
-      for (const item of cart) {
-        await sbUpdate('trees', `id=eq.${encodeURIComponent(item.treeId)}`, {
-          owner: name, custom_name: item.customName, fruit_pref: item.fruitPref
-        });
-      }
-      cart = [];
-      updateCartUI();
-      toggleCart(false);
-      await loadFromSupabase();
-      alert('認養登記已寫入雲端資料庫！');
-    }
-
-    function openHistoryModal(id) {
-      activeHistoryTree = trees.find(x => x.id === id);
-      if (!activeHistoryTree || activeHistoryTree.logs.length === 0) return;
-      activeLogIndex = 0;
-      const displayName = activeHistoryTree.owner && activeHistoryTree.customName
-        ? `${activeHistoryTree.customName}（${activeHistoryTree.id}）` : activeHistoryTree.id;
-      document.getElementById('hist-title').textContent = `${displayName} 生長履歷`;
-      document.getElementById('hist-owner-badge').textContent = activeHistoryTree.owner ? `主人：${activeHistoryTree.owner}` : '開放認養中';
-      document.getElementById('history-modal').classList.remove('hidden');
-      renderHistoryView();
-    }
-
-    function renderHistoryView() {
-      if (!activeHistoryTree) return;
-      const logs = activeHistoryTree.logs;
-      const currentLog = logs[activeLogIndex];
-      document.getElementById('hist-main-photo').src = currentLog.photo;
-      document.getElementById('hist-photo-counter').textContent = `${activeLogIndex + 1} / ${logs.length}`;
-      document.getElementById('hist-photo-date').textContent = currentLog.date;
-
-      const timelineEl = document.getElementById('hist-timeline');
-      timelineEl.innerHTML = logs.map((log, idx) => {
-        const isSelected = idx === activeLogIndex;
-        return `
-          <div id="log-item-${idx}" onclick="selectHistoryLog(${idx})"
-            class="p-3 rounded-xl cursor-pointer transition-all duration-150 border ${
-              isSelected ? 'bg-amber-100 border-amber-500 shadow-md ring-2 ring-amber-400/60' : 'bg-white border-earth/70 hover:bg-earth-light/60 opacity-80 hover:opacity-100'
-            }">
-            <div class="flex items-center justify-between gap-2 mb-1">
-              <span class="font-bold text-xs ${isSelected ? 'text-amber-950' : 'text-earth-mid'}">${isSelected ? '▶ ' : ''}${log.date}</span>
-              ${log.isCustom ? '<span class="text-[10px] font-bold bg-amber-500 text-stone-950 px-1.5 py-0.5 rounded">客製</span>' : '<span class="text-[10px] bg-earth-light text-earth-dark px-1.5 py-0.5 rounded">常規</span>'}
-            </div>
-            <p class="text-xs leading-relaxed ${isSelected ? 'text-stone-950 font-bold' : 'text-stone-700'}">${log.text}</p>
-          </div>
-        `;
-      }).join('');
-
-      const activeCard = document.getElementById(`log-item-${activeLogIndex}`);
-      if (activeCard) activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-
-    function navigateHistory(step) {
-      if (!activeHistoryTree || activeHistoryTree.logs.length <= 1) return;
-      const total = activeHistoryTree.logs.length;
-      activeLogIndex = (activeLogIndex + step + total) % total;
-      renderHistoryView();
-    }
-    function selectHistoryLog(index) { activeLogIndex = index; renderHistoryView(); }
-    function closeHistoryModal() { document.getElementById('history-modal').classList.add('hidden'); activeHistoryTree = null; }
-
-    document.addEventListener('keydown', function(e) {
-      if (document.getElementById('history-modal').classList.contains('hidden')) return;
-      if (e.key === 'ArrowLeft') navigateHistory(-1);
-      if (e.key === 'ArrowRight') navigateHistory(1);
-      if (e.key === 'Escape') closeHistoryModal();
-    });
-
-    function renderMobileSelect() {
-      const sel = document.getElementById('mobile-tree-select');
-      if (!sel) return;
-      sel.innerHTML = trees.map(t => `<option value="${t.id}">${t.id} ${t.owner ? '(已認養)' : '(待認養)'}</option>`).join('');
-      updateMobileTreeHint();
-    }
-    function updateMobileTreeHint() {
-      const val = document.getElementById('mobile-tree-select').value;
-      const t = trees.find(x => x.id === val);
-      if (!t) return;
-      document.getElementById('mobile-tree-owner-hint').innerHTML = t.owner ? `主人：${t.owner}` : '尚無主人';
-    }
-
-    function handleMobilePhoto(e) {
-      const f = e.target.files[0];
-      if (!f) return;
-      const r = new FileReader();
-      r.onload = ev => {
-        currentMobilePhotoData = ev.target.result;
-        const img = document.getElementById('mobile-photo-preview');
-        img.src = currentMobilePhotoData;
-        img.classList.remove('hidden');
-        document.getElementById('mobile-photo-placeholder').classList.add('hidden');
-      };
-      r.readAsDataURL(f);
-    }
-    function useSamplePhoto() {
-      currentMobilePhotoData = 'https://images.unsplash.com/photo-1587393855524-087f83d95bc9?auto=format&fit=crop&w=900&q=80';
-      const img = document.getElementById('mobile-photo-preview');
-      img.src = currentMobilePhotoData;
-      img.classList.remove('hidden');
-      document.getElementById('mobile-photo-placeholder').classList.add('hidden');
-    }
-
-    async function submitFieldLog() {
-      const id = document.getElementById('mobile-tree-select').value;
-      const text = document.getElementById('mobile-log-text').value.trim();
-      const isCustom = document.getElementById('mobile-is-custom').checked;
-      if (!currentMobilePhotoData || !text) return alert('請拍照並輸入文字');
-
-      const btn = document.getElementById('submit-log-btn');
-      btn.disabled = true;
-      btn.textContent = '雲端上傳中...';
-
-      try {
-        const finalText = isCustom && !text.includes('(客製)') ? `${text}(客製)` : text;
-        await sbInsert('tree_logs', {
-          tree_id: id, log_date: new Date().toISOString().split('T')[0],
-          photo_url: currentMobilePhotoData, log_text: finalText, is_custom: isCustom
-        });
-        currentMobilePhotoData = '';
-        document.getElementById('mobile-photo-preview').classList.add('hidden');
-        document.getElementById('mobile-photo-placeholder').classList.remove('hidden');
-        document.getElementById('mobile-log-text').value = '';
-        document.getElementById('mobile-is-custom').checked = false;
-        await loadFromSupabase();
-        alert('上傳成功！資料已永久存入 Supabase 雲端資料庫。');
-      } catch (err) {
-        alert('上傳失敗：' + err.message);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = '確認上傳紀錄（同步存入雲端資料庫）';
-      }
-    }
-
-    function filterAdminTrees(species) {
-      currentAdminFilter = species;
-      ['ALL', '無子檸檬', '四季檸檬', '四季金桔', '桑葚'].forEach(s => {
-        document.getElementById('admin-filter-' + s).className = s === species
-          ? 'px-3 py-1 rounded-full bg-earth-dark text-white font-medium transition'
-          : 'px-3 py-1 rounded-full bg-warm-cream text-earth-dark border border-earth hover:bg-earth-light transition';
-      });
-      renderAdminDashboard();
-    }
-
-    function renderAdminDashboard() {
-      document.getElementById('stat-total').textContent = trees.length;
-      document.getElementById('stat-adopted').textContent = trees.filter(t => t.owner).length;
-      document.getElementById('stat-available').textContent = trees.filter(t => !t.owner).length;
-
-      document.getElementById('count-ALL').textContent = trees.length;
-      ['無子檸檬', '四季檸檬', '四季金桔', '桑葚'].forEach(s => {
-        document.getElementById('count-' + s).textContent = trees.filter(t => t.species === s).length;
-      });
-
-      const filteredAdminTrees = currentAdminFilter === 'ALL' ? trees : trees.filter(t => t.species === currentAdminFilter);
-
-      document.getElementById('admin-tree-tbody').innerHTML = filteredAdminTrees.map(t => `
-        <tr class="border-b hover:bg-warm-cream/60">
-          <td class="p-3 font-bold text-earth-dark">${t.id}</td>
-          <td class="p-3">${t.customName || '-'}</td>
-          <td class="p-3">NT$${t.isTestVip ? 0 : (t.ageYear<=2?900:1800)}</td>
-          <td class="p-3">${t.owner || '未認養'}</td>
-          <td class="p-3 text-right">${t.owner ? `<button onclick="releaseTree('${t.id}')" class="text-red-600 hover:underline">解除</button>` : `<button onclick="assignVip('${t.id}')" class="text-amber-700 hover:underline font-medium">設內測</button>`}</td>
-        </tr>
-      `).join('');
-
-      document.getElementById('line-sim-user').innerHTML = trees.filter(t => t.owner).map(t => `<option value="${t.id}">${t.id} - ${t.owner}</option>`).join('') || '<option>無已認養樹</option>';
-    }
-
-    async function addNewTree() {
-      const species = document.getElementById('admin-new-species').value;
-      const sameSpeciesTrees = trees.filter(t => t.species === species);
-      const nextNum = sameSpeciesTrees.length + 1;
-      const id = `${species}${nextNum < 10 ? `0${nextNum}` : nextNum}`;
-
-      try {
-        await sbInsert('trees', {
-          id, species, custom_name: '', age_year: 1, owner: '', is_test_vip: false, fruit_pref: ''
-        });
-        await sbInsert('tree_logs', {
-          tree_id: id, log_date: new Date().toISOString().split('T')[0],
-          photo_url: 'https://images.unsplash.com/photo-1590502593747-42a996133562?auto=format&fit=crop&w=900&q=80',
-          log_text: '新定植建檔完成。', is_custom: false
-        });
-        await loadFromSupabase();
-        if (currentAdminFilter !== 'ALL' && currentAdminFilter !== species) filterAdminTrees(species);
-      } catch (err) {
-        alert('新增失敗：' + err.message);
-      }
-    }
-
-    async function assignVip(id) {
-      const name = prompt('輸入親友內測名稱：', '陳大哥');
-      if (!name) return;
-      await sbUpdate('trees', `id=eq.${encodeURIComponent(id)}`, {
-        owner: name, custom_name: '內測專屬樹', is_test_vip: true
-      });
-      await loadFromSupabase();
-    }
-
-    async function releaseTree(id) {
-      await sbUpdate('trees', `id=eq.${encodeURIComponent(id)}`, {
-        owner: '', custom_name: '', is_test_vip: false, fruit_pref: ''
-      });
-      await loadFromSupabase();
-    }
-
-    function simulateLineMenuClick(type) {
-      const id = document.getElementById('line-sim-user').value;
-      if (!id) return alert('請先設定已認養樹');
-      const t = trees.find(x => x.id === id);
-      const box = document.getElementById('line-chat-box');
-      if (type === 'latest') {
-        box.innerHTML += `<div class="bg-white p-2 rounded mt-1"><b>${t.id} 最新日誌：</b><img src="${t.logs[0].photo}" class="w-full h-24 object-cover rounded my-1" /><p>${t.logs[0].text}</p><span class="text-[10px] text-emerald-600">✓ 官方LINE被動回覆 (0元)</span></div>`;
-      } else {
-        box.innerHTML += `<div class="bg-white p-2 rounded mt-1"><b>客製化申請已送達園主：</b><p>已收到您對 ${t.id} 的養護討論需求。</p></div>`;
-      }
-      box.scrollTop = box.scrollHeight;
-    }
-
-    loadFromSupabase();
-  </script>
-</body>
-</html>
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, { method
