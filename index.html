@@ -47,7 +47,7 @@
           </div>
         </div>
         <button type="button" onclick="toggleCart()" class="relative bg-earth-dark hover:bg-earth-mid text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 transition shadow-sm">
-          <span>認養清單</span>
+          <span>認養申請清單</span>
           <span id="cart-badge" class="bg-amber-500 text-stone-900 font-bold text-xs px-2 py-0.5 rounded-full">0</span>
         </button>
       </div>
@@ -60,7 +60,7 @@
         <span class="inline-block bg-amber-500/90 text-stone-950 font-bold text-xs px-3 py-1 rounded-full mb-4">無子檸檬・四季檸檬・四季金桔・桑葚</span>
         <h2 class="text-3xl md:text-5xl font-bold leading-tight mb-4 max-w-2xl">在嘉義陽光與生物炭沃土中，<br/>認養一棵寫著你名字的果樹</h2>
         <p class="text-stone-200 text-base md:text-lg max-w-xl mb-8 leading-relaxed">
-          一對一專屬認養制。為你的果樹取名、透過官方 LINE 隨時查看田間最新生長日誌，豐收時帶家人親自來園採摘！
+          一對一專屬認養制。送出認養申請並與園主確認後，即可為你的果樹掛上專屬樹名、透過官方 LINE 隨時查看田間最新生長日誌！
         </p>
         <div class="flex flex-wrap gap-3">
           <a href="#tree-list" class="bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold px-6 py-3 rounded-lg shadow transition">立即挑選果樹編號</a>
@@ -78,11 +78,11 @@
       <div class="grid md:grid-cols-3 gap-6">
         <div class="bg-white rounded-2xl p-6 border border-earth shadow-sm">
           <div class="w-10 h-10 rounded-lg bg-earth-light text-earth-dark font-bold flex items-center justify-center mb-4">01</div>
-          <h4 class="font-bold text-lg text-earth-dark mb-2">專屬認養年費</h4>
+          <h4 class="font-bold text-lg text-earth-dark mb-2">專屬認養年費與審核</h4>
           <ul class="space-y-2 text-sm text-stone-700 leading-relaxed">
             <li class="p-2.5 bg-amber-50 rounded-lg border border-amber-200">
               <span class="font-bold text-amber-900">專屬認養年費：NT$ 1,800 / 年</span><br/>
-              <span class="text-xs text-stone-600">一樹一主專屬照護、專屬樹名與生長履歷紀錄。</span>
+              <span class="text-xs text-stone-600">送出申請後，由園主聯繫確認並審核通過即正式生效。</span>
             </li>
             <li class="p-2.5 bg-earth-light rounded-lg border border-earth">
               <span class="font-bold text-earth-dark">優先自採與透明計價</span><br/>
@@ -95,7 +95,7 @@
           <div class="w-10 h-10 rounded-lg bg-earth-light text-earth-dark font-bold flex items-center justify-center mb-4">02</div>
           <h4 class="font-bold text-lg text-earth-dark mb-2">專屬命名與客製化培養</h4>
           <ul class="space-y-2 text-sm text-stone-700 leading-relaxed">
-            <li>• <strong>專屬樹名：</strong>認養後可自訂樹名，到期放棄則回歸原編號。</li>
+            <li>• <strong>專屬樹名：</strong>審核通過後正式啟用專屬樹名，到期放棄則回歸原編號。</li>
             <li>• <strong>間接介入：</strong>可與園主討論施肥，具燒根風險（如未發酵生糞）園主保有否決權。</li>
             <li>• <strong>免費 LINE 查詢：</strong>隨時於官方 LINE 點選選單免費查看最新照片。</li>
           </ul>
@@ -209,16 +209,16 @@
         <div class="text-2xl font-bold text-earth-dark mt-1"><span id="stat-total">0</span> 棵</div>
       </div>
       <div class="bg-white p-5 rounded-2xl border border-earth shadow-sm">
-        <div class="text-xs text-earth-mid font-medium">已認養（含內測）</div>
+        <div class="text-xs text-earth-mid font-medium">已核准認養</div>
         <div class="text-2xl font-bold text-emerald-700 mt-1"><span id="stat-adopted">0</span> 棵</div>
       </div>
       <div class="bg-white p-5 rounded-2xl border border-earth shadow-sm">
-        <div class="text-xs text-earth-mid font-medium">開放認養中</div>
-        <div class="text-2xl font-bold text-amber-600 mt-1"><span id="stat-available">0</span> 棵</div>
+        <div class="text-xs text-earth-mid font-medium">待審核申請</div>
+        <div class="text-2xl font-bold text-amber-600 mt-1"><span id="stat-pending">0</span> 棵</div>
       </div>
       <div class="bg-white p-5 rounded-2xl border border-earth shadow-sm">
-        <div class="text-xs text-earth-mid font-medium">LINE 訊息費用</div>
-        <div class="text-2xl font-bold text-earth-dark mt-1">NT$ 0 <span class="text-xs font-normal text-emerald-700">被動回覆</span></div>
+        <div class="text-xs text-earth-mid font-medium">開放認養中</div>
+        <div class="text-2xl font-bold text-earth-dark mt-1"><span id="stat-available">0</span> 棵</div>
       </div>
     </div>
 
@@ -226,7 +226,7 @@
       <div class="lg:col-span-2 bg-white rounded-2xl border border-earth shadow-sm overflow-hidden">
         <div class="p-5 border-b border-earth space-y-3">
           <div class="flex flex-wrap justify-between items-center gap-3">
-            <h3 class="font-bold text-lg text-earth-dark">果樹編號總管與認養狀態</h3>
+            <h3 class="font-bold text-lg text-earth-dark">果樹編號總管與認養審核</h3>
             <div class="flex flex-wrap items-center gap-2">
               <select id="admin-new-species" class="text-xs border border-earth rounded-lg px-3 py-1.5 bg-warm-cream font-bold text-earth-dark focus:outline-none">
                 <option value="無子檸檬">無子檸檬</option>
@@ -249,6 +249,7 @@
           <div class="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
             <span class="text-stone-500 mr-1">篩選檢視：</span>
             <button type="button" onclick="filterAdminTrees('ALL')" id="admin-filter-ALL" class="px-3 py-1 rounded-full bg-earth-dark text-white font-medium transition">全部 (<span id="count-ALL">0</span>)</button>
+            <button type="button" onclick="filterAdminTrees('PENDING')" id="admin-filter-PENDING" class="px-3 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200 font-bold transition">待審核 (<span id="count-PENDING">0</span>)</button>
             <button type="button" onclick="filterAdminTrees('無子檸檬')" id="admin-filter-無子檸檬" class="px-3 py-1 rounded-full bg-warm-cream text-earth-dark border border-earth hover:bg-earth-light transition">無子檸檬 (<span id="count-無子檸檬">0</span>)</button>
             <button type="button" onclick="filterAdminTrees('四季檸檬')" id="admin-filter-四季檸檬" class="px-3 py-1 rounded-full bg-warm-cream text-earth-dark border border-earth hover:bg-earth-light transition">四季檸檬 (<span id="count-四季檸檬">0</span>)</button>
             <button type="button" onclick="filterAdminTrees('四季金桔')" id="admin-filter-四季金桔" class="px-3 py-1 rounded-full bg-warm-cream text-earth-dark border border-earth hover:bg-earth-light transition">四季金桔 (<span id="count-四季金桔">0</span>)</button>
@@ -261,10 +262,10 @@
             <thead class="bg-earth-light text-earth-dark text-xs">
               <tr>
                 <th class="p-3">編號</th>
-                <th class="p-3">樹名</th>
+                <th class="p-3">申請/專屬樹名</th>
                 <th class="p-3">年費</th>
-                <th class="p-3">認養人 / 偏好</th>
-                <th class="p-3 text-right">操作</th>
+                <th class="p-3">狀態 / 認養人資訊</th>
+                <th class="p-3 text-right">審核與操作</th>
               </tr>
             </thead>
             <tbody id="admin-tree-tbody" class="divide-y divide-earth text-xs"></tbody>
@@ -277,7 +278,7 @@
           <span class="font-bold text-sm">官方 LINE 圖文選單模擬器 (0元)</span>
         </div>
         <div id="line-chat-box" class="flex-1 bg-[#8CABD9] p-3 space-y-2 min-h-[250px] max-h-[350px] overflow-y-auto text-xs">
-          <div class="text-center text-white/80 text-[11px]">請先在左側設定內測或認養人</div>
+          <div class="text-center text-white/80 text-[11px]">僅已通過審核的果樹可於此查詢</div>
         </div>
         <div class="p-3 bg-stone-100 border-t space-y-2">
           <select id="line-sim-user" class="w-full p-1.5 rounded border text-xs bg-white"></select>
@@ -290,18 +291,21 @@
     </div>
   </main>
 
-  <!-- 彈窗 1：認養設定 -->
+  <!-- 彈窗 1：認養申請設定 -->
   <div id="adopt-modal" class="hidden fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4">
-      <h3 class="font-bold text-lg text-earth-dark">專屬認養設定：<span id="modal-tree-code"></span></h3>
-      <input type="text" id="modal-custom-name" placeholder="取個專屬樹名（如：小綠寶）" class="w-full px-3 py-2 rounded-lg border bg-warm-cream text-sm" />
+      <h3 class="font-bold text-lg text-earth-dark">送出認養申請：<span id="modal-tree-code"></span></h3>
+      <p class="text-xs text-stone-600 bg-amber-50 p-2.5 rounded-lg border border-amber-200">
+        送出申請後將進入「園主審核中」，園主與您確認並同意後即正式成立認養。
+      </p>
+      <input type="text" id="modal-custom-name" placeholder="希望取的專屬樹名（如：小綠寶）" class="w-full px-3 py-2 rounded-lg border bg-warm-cream text-sm" />
       <select id="modal-fruit-pref" class="w-full px-3 py-2 rounded-lg border bg-warm-cream text-sm">
         <option value="綠檸檬（酸香爽口）">綠檸檬（酸香爽口）</option>
         <option value="黃檸檬（香氣濃郁）">黃檸檬（香氣濃郁）</option>
       </select>
       <div class="flex gap-2">
         <button type="button" onclick="closeAdoptModal()" class="flex-1 py-2 rounded border text-xs">取消</button>
-        <button type="button" onclick="confirmAddToCart()" class="flex-1 py-2 rounded bg-earth-dark text-white font-bold text-xs">加入清單</button>
+        <button type="button" onclick="confirmAddToCart()" class="flex-1 py-2 rounded bg-earth-dark text-white font-bold text-xs">加入申請清單</button>
       </div>
     </div>
   </div>
@@ -351,17 +355,19 @@
     </div>
   </div>
 
-  <!-- 購物車側邊欄 -->
+  <!-- 購物車側邊欄：送出認養申請 -->
   <div id="cart-drawer" class="hidden fixed inset-0 z-50 bg-black/50 flex justify-end">
     <div class="bg-white w-full max-w-md h-full flex flex-col">
       <div class="p-4 bg-earth-dark text-white flex justify-between items-center">
-        <h3 class="font-bold">認養清單</h3>
+        <h3 class="font-bold">認養申請清單</h3>
         <button type="button" onclick="toggleCart()" class="text-xl font-bold">&times;</button>
       </div>
       <div id="cart-items" class="flex-1 p-4 overflow-y-auto space-y-2 text-sm"></div>
-      <div class="p-4 border-t bg-warm-cream space-y-2">
-        <input type="text" id="checkout-owner-name" placeholder="您的姓名（必填）" class="w-full px-3 py-2 rounded border text-sm" />
-        <button type="button" onclick="completeCheckout()" class="w-full bg-amber-500 text-stone-950 font-bold py-2.5 rounded text-sm">完成認養登記</button>
+      <div class="p-4 border-t bg-warm-cream space-y-2.5">
+        <p class="text-xs text-stone-600">送出申請後不會立即扣款，園主審核確認並與您聯繫後才正式生效。</p>
+        <input type="text" id="checkout-owner-name" placeholder="您的姓名（必填）" class="w-full px-3 py-2 rounded border text-sm bg-white" />
+        <input type="text" id="checkout-owner-contact" placeholder="您的 LINE 名稱或聯絡電話（必填，方便園主聯繫）" class="w-full px-3 py-2 rounded border text-sm bg-white" />
+        <button type="button" onclick="completeCheckout()" class="w-full bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold py-2.5 rounded text-sm transition">送出認養申請（待園主審核）</button>
       </div>
     </div>
   </div>
@@ -373,7 +379,7 @@
     const CLOUDINARY_CLOUD_NAME = 'srw6wwri';
     const CLOUDINARY_UPLOAD_PRESET = 'hso20261121';
 
-    const ADMIN_PASSCODE = '0966671036';
+    const ADMIN_PASSCODE = 'kunxiang2026';
     const DEFAULT_ANNUAL_FEE = 1800;
     let isStaffUnlocked = sessionStorage.getItem('kx_staff_unlocked') === '1';
 
@@ -410,6 +416,13 @@
         return tree.annualFee;
       }
       return DEFAULT_ANNUAL_FEE;
+    }
+
+    // 判斷果樹狀態：'approved'（已核准認養）、'pending'（申請審核中）、'available'（開放認養）
+    function getTreeState(tree) {
+      if (!tree.owner) return 'available';
+      if (tree.adoptStatus === 'pending') return 'pending';
+      return 'approved';
     }
 
     const sbHeaders = {
@@ -506,7 +519,7 @@
 
     const DEFAULT_SEED_TREES = [
       {
-        id: '無子檸檬01', species: '無子檸檬', customName: '小綠寶', ageYear: 1, annualFee: 1800, owner: '王小明（內測）', isTestVip: true, fruitPref: '綠檸檬',
+        id: '無子檸檬01', species: '無子檸檬', customName: '小綠寶', ageYear: 1, annualFee: 1800, owner: '王小明（內測）', adoptStatus: 'approved', isTestVip: true, fruitPref: '綠檸檬',
         logs: [
           { date: '2026-11-20', photo: 'https://images.unsplash.com/photo-1587393855524-087f83d95bc9?auto=format&fit=crop&w=900&q=80', text: '施3號肥料(客製)，並混入自製稻殼炭改善根圈透氣。', isCustom: true },
           { date: '2026-11-12', photo: 'https://images.unsplash.com/photo-1590502593747-42a996133562?auto=format&fit=crop&w=900&q=80', text: '株距中間深埋魚內臟補充天然有機養分，新芽抽出。', isCustom: false },
@@ -514,22 +527,22 @@
         ]
       },
       {
-        id: '無子檸檬02', species: '無子檸檬', customName: '', ageYear: 1, annualFee: 1800, owner: '', isTestVip: false, fruitPref: '',
+        id: '無子檸檬02', species: '無子檸檬', customName: '', ageYear: 1, annualFee: 1800, owner: '', adoptStatus: '', isTestVip: false, fruitPref: '',
         logs: [{ date: '2026-11-15', photo: 'https://images.unsplash.com/photo-1590502593747-42a996133562?auto=format&fit=crop&w=900&q=80', text: '株距間深埋魚內臟有機肥。', isCustom: false }]
       },
       {
-        id: '四季檸檬01', species: '四季檸檬', customName: '黃金樹', ageYear: 3, annualFee: 1800, owner: '林雅婷', isTestVip: false, fruitPref: '黃檸檬',
+        id: '四季檸檬01', species: '四季檸檬', customName: '黃金樹', ageYear: 3, annualFee: 1800, owner: '林雅婷', adoptStatus: 'approved', isTestVip: false, fruitPref: '黃檸檬',
         logs: [
           { date: '2026-11-17', photo: 'https://images.unsplash.com/photo-1582979512210-99b6a53386f9?auto=format&fit=crop&w=900&q=80', text: '保留部分果實轉黃(客製)，果皮香氣濃郁。', isCustom: true },
           { date: '2026-11-05', photo: 'https://images.unsplash.com/photo-1587393855524-087f83d95bc9?auto=format&fit=crop&w=900&q=80', text: '進行疏果與枝條微修剪，讓陽光均勻照射果實。', isCustom: false }
         ]
       },
       {
-        id: '四季金桔01', species: '四季金桔', customName: '', ageYear: 2, annualFee: 1800, owner: '', isTestVip: false, fruitPref: '',
+        id: '四季金桔01', species: '四季金桔', customName: '', ageYear: 2, annualFee: 1800, owner: '', adoptStatus: '', isTestVip: false, fruitPref: '',
         logs: [{ date: '2026-11-12', photo: 'https://images.unsplash.com/photo-1611080626919-7cf5a9dbab5b?auto=format&fit=crop&w=900&q=80', text: '進行枝條修剪與除草。', isCustom: false }]
       },
       {
-        id: '桑葚01', species: '桑葚', customName: '', ageYear: 1, annualFee: 1800, owner: '', isTestVip: false, fruitPref: '',
+        id: '桑葚01', species: '桑葚', customName: '', ageYear: 1, annualFee: 1800, owner: '', adoptStatus: '', isTestVip: false, fruitPref: '',
         logs: [{ date: '2026-11-14', photo: 'https://images.unsplash.com/photo-1596591606975-97ee5cef3a1e?auto=format&fit=crop&w=900&q=80', text: '根圈混合稻殼炭與有機質。', isCustom: false }]
       }
     ];
@@ -623,6 +636,7 @@
             ageYear: r.age_year || 1,
             annualFee: typeof r.annual_fee === 'number' ? r.annual_fee : DEFAULT_ANNUAL_FEE,
             owner: r.owner || '',
+            adoptStatus: r.adopt_status || '',
             isTestVip: Boolean(r.is_test_vip),
             fruitPref: r.fruit_pref || '',
             logs: treeLogs.length > 0 ? treeLogs : [{
@@ -655,10 +669,25 @@
       const filtered = currentFilter === 'ALL' ? trees : trees.filter(t => t.species === currentFilter);
 
       filtered.forEach(tree => {
-        const isAdopted = Boolean(tree.owner);
-        const displayName = isAdopted && tree.customName ? `${tree.customName}（${tree.id}）` : tree.id;
+        const state = getTreeState(tree);
+        const isApproved = state === 'approved';
+        const isPending = state === 'pending';
+
+        // 只有「已核准認養」才顯示專屬樹名，審核中仍顯示原編號
+        const displayName = isApproved && tree.customName ? `${tree.customName}（${tree.id}）` : tree.id;
         const fee = getTreeFee(tree);
         const latestLog = tree.logs[0];
+
+        let badgeHtml = '<span class="absolute top-2 left-2 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white">開放認養</span>';
+        let actionBtnHtml = `<button type="button" onclick="openAdoptModal('${tree.id}')" class="py-1.5 px-1 bg-earth-dark hover:bg-earth-mid text-white rounded text-xs font-bold transition">申請認養</button>`;
+
+        if (isApproved) {
+          badgeHtml = '<span class="absolute top-2 left-2 text-[11px] font-bold px-2 py-0.5 rounded-full bg-stone-800 text-amber-300">已認養</span>';
+          actionBtnHtml = '<button type="button" disabled class="py-1.5 px-1 bg-stone-200 text-stone-500 rounded text-xs">已認養</button>';
+        } else if (isPending) {
+          badgeHtml = '<span class="absolute top-2 left-2 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500 text-stone-950">審核中</span>';
+          actionBtnHtml = '<button type="button" disabled class="py-1.5 px-1 bg-amber-100 text-amber-900 border border-amber-300 rounded text-xs font-medium">園主審核中</button>';
+        }
 
         const card = document.createElement('div');
         card.className = 'bg-white rounded-2xl border border-earth overflow-hidden shadow-sm flex flex-col justify-between';
@@ -666,7 +695,7 @@
           <div>
             <div class="relative h-40 bg-stone-200 cursor-pointer" onclick="openHistoryModal('${tree.id}')">
               <img src="${latestLog.photo}" class="w-full h-full object-cover hover:scale-105 transition duration-300" />
-              <span class="absolute top-2 left-2 text-[11px] font-bold px-2 py-0.5 rounded-full ${isAdopted ? 'bg-stone-800 text-amber-300' : 'bg-emerald-600 text-white'}">${isAdopted ? '已認養' : '開放認養'}</span>
+              ${badgeHtml}
               <span class="absolute bottom-2 right-2 bg-black/65 text-white text-[10px] px-2 py-0.5 rounded">共 ${tree.logs.length} 筆紀錄</span>
             </div>
             <div class="p-3.5">
@@ -682,7 +711,7 @@
             </div>
             <div class="grid grid-cols-2 gap-1.5">
               <button type="button" onclick="openHistoryModal('${tree.id}')" class="py-1.5 px-1 border border-earth text-earth-dark rounded text-xs font-bold hover:bg-earth-light transition">生長日誌 (${tree.logs.length})</button>
-              ${isAdopted ? '<button type="button" disabled class="py-1.5 px-1 bg-stone-200 text-stone-500 rounded text-xs">已認養</button>' : `<button type="button" onclick="openAdoptModal('${tree.id}')" class="py-1.5 px-1 bg-earth-dark hover:bg-earth-mid text-white rounded text-xs font-bold transition">認養</button>`}
+              ${actionBtnHtml}
             </div>
           </div>
         `;
@@ -703,6 +732,9 @@
     function openAdoptModal(treeId) {
       selectedTreeForAdopt = trees.find(t => t.id === treeId);
       if (!selectedTreeForAdopt) return;
+      if (getTreeState(selectedTreeForAdopt) !== 'available') {
+        return alert('此果樹目前已有認養申請或已認養。');
+      }
       document.getElementById('modal-tree-code').textContent = selectedTreeForAdopt.id;
       document.getElementById('modal-custom-name').value = '';
       document.getElementById('adopt-modal').classList.remove('hidden');
@@ -711,6 +743,11 @@
 
     function confirmAddToCart() {
       if (!selectedTreeForAdopt) return;
+      if (cart.some(c => c.treeId === selectedTreeForAdopt.id)) {
+        closeAdoptModal();
+        toggleCart(true);
+        return;
+      }
       const customName = document.getElementById('modal-custom-name').value.trim();
       const fruitPref = document.getElementById('modal-fruit-pref').value;
       const fee = getTreeFee(selectedTreeForAdopt);
@@ -720,34 +757,59 @@
       toggleCart(true);
     }
 
+    function removeFromCart(treeId) {
+      cart = cart.filter(c => c.treeId !== treeId);
+      updateCartUI();
+    }
+
     function updateCartUI() {
       document.getElementById('cart-badge').textContent = cart.length;
-      document.getElementById('cart-items').innerHTML = cart.map(i => `<div class="p-2 border rounded bg-warm-cream text-xs"><b>${i.treeId}</b> (${i.customName || '無代號'}) - NT$${i.fee}</div>`).join('') || '<p class="text-xs text-stone-500">清單空空的</p>';
+      document.getElementById('cart-items').innerHTML = cart.map(i => `
+        <div class="p-2.5 border rounded-lg bg-warm-cream text-xs flex justify-between items-center">
+          <div>
+            <b>${i.treeId}</b>（希望樹名：${i.customName || '未填'}）<br/>
+            <span class="text-stone-600">${i.fruitPref} ・ NT$${i.fee}/年</span>
+          </div>
+          <button type="button" onclick="removeFromCart('${i.treeId}')" class="text-red-600 hover:underline">移除</button>
+        </div>
+      `).join('') || '<p class="text-xs text-stone-500">申請清單目前是空的</p>';
     }
 
     async function completeCheckout() {
+      if (cart.length === 0) return alert('請先挑選要申請認養的果樹');
       const name = document.getElementById('checkout-owner-name').value.trim();
-      if (!name) return alert('請填寫姓名');
-      for (const item of cart) {
-        await sbUpdate('trees', `id=eq.${encodeURIComponent(item.treeId)}`, {
-          owner: name, custom_name: item.customName, fruit_pref: item.fruitPref
-        });
+      const contact = document.getElementById('checkout-owner-contact').value.trim();
+      if (!name || !contact) return alert('請填寫您的姓名與 LINE / 聯絡電話，方便園主審核聯繫！');
+
+      try {
+        for (const item of cart) {
+          await sbUpdate('trees', `id=eq.${encodeURIComponent(item.treeId)}`, {
+            owner: `${name} (${contact})`,
+            custom_name: item.customName,
+            fruit_pref: item.fruitPref,
+            adopt_status: 'pending'
+          });
+        }
+        cart = [];
+        updateCartUI();
+        toggleCart(false);
+        await loadFromSupabase();
+        alert('認養申請已送出！目前為「園主審核中」，請加官方 LINE 與園主確認後即正式完成認養。');
+      } catch (err) {
+        alert('送出失敗（請確認 Supabase 資料表已新增 adopt_status 欄位）：' + err.message);
       }
-      cart = [];
-      updateCartUI();
-      toggleCart(false);
-      await loadFromSupabase();
-      alert('認養登記已寫入雲端資料庫！');
     }
 
     function openHistoryModal(id) {
       activeHistoryTree = trees.find(x => x.id === id);
       if (!activeHistoryTree || activeHistoryTree.logs.length === 0) return;
       activeLogIndex = 0;
-      const displayName = activeHistoryTree.owner && activeHistoryTree.customName
+      const state = getTreeState(activeHistoryTree);
+      const displayName = state === 'approved' && activeHistoryTree.customName
         ? `${activeHistoryTree.customName}（${activeHistoryTree.id}）` : activeHistoryTree.id;
       document.getElementById('hist-title').textContent = `${displayName} 生長履歷`;
-      document.getElementById('hist-owner-badge').textContent = activeHistoryTree.owner ? `主人：${activeHistoryTree.owner}` : '開放認養中';
+      document.getElementById('hist-owner-badge').textContent =
+        state === 'approved' ? `主人：${activeHistoryTree.owner}` : (state === 'pending' ? '認養審核中' : '開放認養中');
       document.getElementById('history-modal').classList.remove('hidden');
       renderHistoryView();
     }
@@ -801,7 +863,11 @@
       const sel = document.getElementById('mobile-tree-select');
       if (!sel || trees.length === 0) return;
       const prevVal = sel.value;
-      sel.innerHTML = trees.map(t => `<option value="${t.id}">${t.id} ${t.owner ? '(已認養)' : '(待認養)'}</option>`).join('');
+      sel.innerHTML = trees.map(t => {
+        const state = getTreeState(t);
+        const tag = state === 'approved' ? '(已認養)' : (state === 'pending' ? '(審核中)' : '(待認養)');
+        return `<option value="${t.id}">${t.id} ${tag}</option>`;
+      }).join('');
       if (prevVal && trees.some(t => t.id === prevVal)) sel.value = prevVal;
       updateMobileTreeHint();
     }
@@ -812,7 +878,10 @@
       if (!sel || !hint) return;
       const t = trees.find(x => x.id === sel.value);
       if (!t) return;
-      hint.innerHTML = t.owner ? `主人：${t.owner}` : '尚無主人';
+      const state = getTreeState(t);
+      hint.innerHTML = state === 'approved'
+        ? `主人：${t.owner}`
+        : (state === 'pending' ? `審核中申請人：${t.owner}` : '尚無主人');
     }
 
     async function handleMobilePhoto(e) {
@@ -891,47 +960,107 @@
       }
     }
 
-    function filterAdminTrees(species) {
-      currentAdminFilter = species;
-      ['ALL', '無子檸檬', '四季檸檬', '四季金桔', '桑葚'].forEach(s => {
-        document.getElementById('admin-filter-' + s).className = s === species
-          ? 'px-3 py-1 rounded-full bg-earth-dark text-white font-medium transition'
-          : 'px-3 py-1 rounded-full bg-warm-cream text-earth-dark border border-earth hover:bg-earth-light transition';
+    function filterAdminTrees(filterKey) {
+      currentAdminFilter = filterKey;
+      ['ALL', 'PENDING', '無子檸檬', '四季檸檬', '四季金桔', '桑葚'].forEach(s => {
+        const el = document.getElementById('admin-filter-' + s);
+        if (!el) return;
+        if (s === filterKey) {
+          el.className = 'px-3 py-1 rounded-full bg-earth-dark text-white font-medium transition';
+        } else if (s === 'PENDING') {
+          el.className = 'px-3 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200 font-bold transition';
+        } else {
+          el.className = 'px-3 py-1 rounded-full bg-warm-cream text-earth-dark border border-earth hover:bg-earth-light transition';
+        }
       });
       renderAdminDashboard();
     }
 
     function renderAdminDashboard() {
+      const approvedTrees = trees.filter(t => getTreeState(t) === 'approved');
+      const pendingTrees = trees.filter(t => getTreeState(t) === 'pending');
+      const availableTrees = trees.filter(t => getTreeState(t) === 'available');
+
       document.getElementById('stat-total').textContent = trees.length;
-      document.getElementById('stat-adopted').textContent = trees.filter(t => t.owner).length;
-      document.getElementById('stat-available').textContent = trees.filter(t => !t.owner).length;
+      document.getElementById('stat-adopted').textContent = approvedTrees.length;
+      document.getElementById('stat-pending').textContent = pendingTrees.length;
+      document.getElementById('stat-available').textContent = availableTrees.length;
 
       document.getElementById('count-ALL').textContent = trees.length;
+      document.getElementById('count-PENDING').textContent = pendingTrees.length;
       ['無子檸檬', '四季檸檬', '四季金桔', '桑葚'].forEach(s => {
         document.getElementById('count-' + s).textContent = trees.filter(t => t.species === s).length;
       });
 
-      const filteredAdminTrees = currentAdminFilter === 'ALL' ? trees : trees.filter(t => t.species === currentAdminFilter);
+      let filteredAdminTrees = trees;
+      if (currentAdminFilter === 'PENDING') {
+        filteredAdminTrees = pendingTrees;
+      } else if (currentAdminFilter !== 'ALL') {
+        filteredAdminTrees = trees.filter(t => t.species === currentAdminFilter);
+      }
 
       document.getElementById('admin-tree-tbody').innerHTML = filteredAdminTrees.map(t => {
         const fee = getTreeFee(t);
+        const state = getTreeState(t);
+
+        let statusHtml = '<span class="text-stone-500">未認養</span>';
+        let actionHtml = `<button type="button" onclick="assignVip('${t.id}')" class="text-amber-700 hover:underline font-medium">設內測</button>`;
+
+        if (state === 'pending') {
+          statusHtml = `<span class="inline-block bg-amber-100 text-amber-900 font-bold px-1.5 py-0.5 rounded mr-1">待審核</span><b>${t.owner}</b>`;
+          actionHtml = `
+            <button type="button" onclick="approveAdoption('${t.id}')" class="px-2 py-1 rounded bg-emerald-600 hover:bg-emerald-700 text-white font-bold">✅ 同意</button>
+            <button type="button" onclick="rejectAdoption('${t.id}')" class="px-2 py-1 rounded bg-red-600 hover:bg-red-700 text-white font-bold">❌ 駁回</button>
+          `;
+        } else if (state === 'approved') {
+          statusHtml = `<span class="inline-block bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded mr-1">已認養</span>${t.owner}`;
+          actionHtml = `<button type="button" onclick="releaseTree('${t.id}')" class="text-red-600 hover:underline">解除</button>`;
+        }
+
         return `
-          <tr class="border-b hover:bg-warm-cream/60">
+          <tr class="border-b ${state === 'pending' ? 'bg-amber-50/70' : 'hover:bg-warm-cream/60'}">
             <td class="p-3 font-bold text-earth-dark">${t.id}</td>
             <td class="p-3">${t.customName || '-'}</td>
             <td class="p-3">
               <button type="button" onclick="editTreeFee('${t.id}')" class="font-bold text-earth-dark underline hover:text-amber-700" title="點擊修改此樹年費">NT$${fee}</button>
             </td>
-            <td class="p-3">${t.owner || '未認養'}</td>
-            <td class="p-3 text-right space-x-2 whitespace-nowrap">
+            <td class="p-3">${statusHtml}</td>
+            <td class="p-3 text-right space-x-1.5 whitespace-nowrap">
               <button type="button" onclick="openManageLogsModal('${t.id}')" class="text-earth-dark hover:underline font-medium">日誌(${t.logs.length})</button>
-              ${t.owner ? `<button type="button" onclick="releaseTree('${t.id}')" class="text-red-600 hover:underline">解除</button>` : `<button type="button" onclick="assignVip('${t.id}')" class="text-amber-700 hover:underline font-medium">設內測</button>`}
+              ${actionHtml}
             </td>
           </tr>
         `;
       }).join('');
 
-      document.getElementById('line-sim-user').innerHTML = trees.filter(t => t.owner).map(t => `<option value="${t.id}">${t.id} - ${t.owner}</option>`).join('') || '<option>無已認養樹</option>';
+      document.getElementById('line-sim-user').innerHTML = approvedTrees.map(t => `<option value="${t.id}">${t.id} - ${t.owner}</option>`).join('') || '<option value="">尚無已核准認養樹</option>';
+    }
+
+    async function approveAdoption(treeId) {
+      const tree = trees.find(t => t.id === treeId);
+      if (!tree) return;
+      if (!confirm(`確定同意「${tree.owner}」認養 ${treeId}（樹名：${tree.customName || '無'}）嗎？`)) return;
+      try {
+        await sbUpdate('trees', `id=eq.${encodeURIComponent(treeId)}`, { adopt_status: 'approved' });
+        await loadFromSupabase();
+        alert(`已核准 ${treeId} 的認養申請！`);
+      } catch (err) {
+        alert('核准失敗：' + err.message);
+      }
+    }
+
+    async function rejectAdoption(treeId) {
+      const tree = trees.find(t => t.id === treeId);
+      if (!tree) return;
+      if (!confirm(`確定駁回「${tree.owner}」對 ${treeId} 的申請，並重新開放認養嗎？`)) return;
+      try {
+        await sbUpdate('trees', `id=eq.${encodeURIComponent(treeId)}`, {
+          owner: '', custom_name: '', fruit_pref: '', adopt_status: '', is_test_vip: false
+        });
+        await loadFromSupabase();
+      } catch (err) {
+        alert('駁回失敗：' + err.message);
+      }
     }
 
     async function editTreeFee(treeId) {
@@ -947,7 +1076,7 @@
         await sbUpdate('trees', `id=eq.${encodeURIComponent(treeId)}`, { annual_fee: num });
         await loadFromSupabase();
       } catch (err) {
-        alert('更新年費失敗（請確認資料表是否有 annual_fee 欄位）：' + err.message);
+        alert('更新年費失敗：' + err.message);
       }
     }
 
@@ -1022,7 +1151,7 @@
 
       try {
         await sbInsert('trees', {
-          id, species, custom_name: '', age_year: 1, annual_fee: 1800, owner: '', is_test_vip: false, fruit_pref: ''
+          id, species, custom_name: '', age_year: 1, annual_fee: 1800, owner: '', adopt_status: '', is_test_vip: false, fruit_pref: ''
         });
         await sbInsert('tree_logs', {
           tree_id: id, log_date: new Date().toISOString().split('T')[0],
@@ -1040,21 +1169,22 @@
       const name = prompt('輸入親友內測名稱：', '陳大哥');
       if (!name) return;
       await sbUpdate('trees', `id=eq.${encodeURIComponent(id)}`, {
-        owner: name, custom_name: '內測專屬樹', is_test_vip: true
+        owner: name, custom_name: '內測專屬樹', adopt_status: 'approved', is_test_vip: true
       });
       await loadFromSupabase();
     }
 
     async function releaseTree(id) {
+      if (!confirm(`確定解除 ${id} 的認養狀態，並重新開放認養嗎？`)) return;
       await sbUpdate('trees', `id=eq.${encodeURIComponent(id)}`, {
-        owner: '', custom_name: '', is_test_vip: false, fruit_pref: ''
+        owner: '', custom_name: '', adopt_status: '', is_test_vip: false, fruit_pref: ''
       });
       await loadFromSupabase();
     }
 
     function simulateLineMenuClick(type) {
       const id = document.getElementById('line-sim-user').value;
-      if (!id) return alert('請先設定已認養樹');
+      if (!id) return alert('請先核准已認養樹');
       const t = trees.find(x => x.id === id);
       const box = document.getElementById('line-chat-box');
       if (type === 'latest') {
