@@ -418,7 +418,6 @@
       return DEFAULT_ANNUAL_FEE;
     }
 
-    // 判斷果樹狀態：'approved'（已核准認養）、'pending'（申請審核中）、'available'（開放認養）
     function getTreeState(tree) {
       if (!tree.owner) return 'available';
       if (tree.adoptStatus === 'pending') return 'pending';
@@ -673,7 +672,6 @@
         const isApproved = state === 'approved';
         const isPending = state === 'pending';
 
-        // 只有「已核准認養」才顯示專屬樹名，審核中仍顯示原編號
         const displayName = isApproved && tree.customName ? `${tree.customName}（${tree.id}）` : tree.id;
         const fee = getTreeFee(tree);
         const latestLog = tree.logs[0];
@@ -796,7 +794,7 @@
         await loadFromSupabase();
         alert('認養申請已送出！目前為「園主審核中」，請加官方 LINE 與園主確認後即正式完成認養。');
       } catch (err) {
-        alert('送出失敗（請確認 Supabase 資料表已新增 adopt_status 欄位）：' + err.message);
+        alert('送出失敗：' + err.message);
       }
     }
 
