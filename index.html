@@ -78,15 +78,15 @@
       <div class="grid md:grid-cols-3 gap-6">
         <div class="bg-white rounded-2xl p-6 border border-earth shadow-sm">
           <div class="w-10 h-10 rounded-lg bg-earth-light text-earth-dark font-bold flex items-center justify-center mb-4">01</div>
-          <h4 class="font-bold text-lg text-earth-dark mb-2">階梯式認養年費</h4>
+          <h4 class="font-bold text-lg text-earth-dark mb-2">專屬認養年費</h4>
           <ul class="space-y-2 text-sm text-stone-700 leading-relaxed">
             <li class="p-2.5 bg-amber-50 rounded-lg border border-amber-200">
-              <span class="font-bold text-amber-900">第 1～2 年（育成期）：NT$ 900 / 年</span><br/>
-              <span class="text-xs text-stone-600">幼樹專注扎根與枝幹養成（不留果）。</span>
+              <span class="font-bold text-amber-900">專屬認養年費：NT$ 1,800 / 年</span><br/>
+              <span class="text-xs text-stone-600">一樹一主專屬照護、專屬樹名與生長履歷紀錄。</span>
             </li>
             <li class="p-2.5 bg-earth-light rounded-lg border border-earth">
-              <span class="font-bold text-earth-dark">第 3 年起（豐產期）：NT$ 1,800 / 年</span><br/>
-              <span class="text-xs text-stone-600">穩定結果期，享有優先購買與自採資格。</span>
+              <span class="font-bold text-earth-dark">優先自採與透明計價</span><br/>
+              <span class="text-xs text-stone-600">享有親子自採與優先購買資格，果實依當日北農批發均價 110% 計價。</span>
             </li>
           </ul>
         </div>
@@ -237,6 +237,9 @@
               <button type="button" onclick="addNewTree()" class="bg-earth-dark hover:bg-earth-mid text-white text-xs font-bold px-3.5 py-1.5 rounded-lg transition shadow-sm">
                 + 新增指定果樹
               </button>
+              <button type="button" onclick="setAllFeesTo1800()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-sm">
+                全部設為 $1800
+              </button>
               <button type="button" onclick="lockStaffMode()" class="text-xs px-3 py-1.5 rounded-lg border border-earth bg-warm-cream hover:bg-stone-200 text-stone-700 font-medium transition">
                 🔒 鎖定後台
               </button>
@@ -337,6 +340,17 @@
     </div>
   </div>
 
+  <!-- 彈窗 3：後台日誌管理（刪除誤傳照片 / 紀錄） -->
+  <div id="manage-logs-modal" class="hidden fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
+      <div class="px-5 py-3.5 bg-earth-dark text-white flex justify-between items-center">
+        <h3 id="manage-logs-title" class="font-bold text-base">管理果樹日誌紀錄</h3>
+        <button type="button" onclick="closeManageLogsModal()" class="text-xl font-bold leading-none">&times;</button>
+      </div>
+      <div id="manage-logs-list" class="p-4 overflow-y-auto space-y-2.5 flex-1 text-xs"></div>
+    </div>
+  </div>
+
   <!-- 購物車側邊欄 -->
   <div id="cart-drawer" class="hidden fixed inset-0 z-50 bg-black/50 flex justify-end">
     <div class="bg-white w-full max-w-md h-full flex flex-col">
@@ -359,7 +373,8 @@
     const CLOUDINARY_CLOUD_NAME = 'srw6wwri';
     const CLOUDINARY_UPLOAD_PRESET = 'hso20261121';
 
-    const ADMIN_PASSCODE = '0966671036';
+    const ADMIN_PASSCODE = 'kunxiang2026';
+    const DEFAULT_ANNUAL_FEE = 1800;
     let isStaffUnlocked = sessionStorage.getItem('kx_staff_unlocked') === '1';
 
     function checkStaffAccess() {
@@ -389,6 +404,14 @@
       switchMode('storefront');
     }
 
+    function getTreeFee(tree) {
+      if (tree.isTestVip) return 0;
+      if (typeof tree.annualFee === 'number' && !Number.isNaN(tree.annualFee)) {
+        return tree.annualFee;
+      }
+      return DEFAULT_ANNUAL_FEE;
+    }
+
     const sbHeaders = {
       'apikey': SUPABASE_KEY,
       'Authorization': `Bearer ${SUPABASE_KEY}`,
@@ -412,6 +435,12 @@
       const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${matchQuery}`, { method: 'PATCH', headers: sbHeaders, body: JSON.stringify(payload) });
       if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
       return await res.json();
+    }
+
+    async function sbDelete(table, matchQuery) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${matchQuery}`, { method: 'DELETE', headers: sbHeaders });
+      if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+      return true;
     }
 
     function compressImageFile(file, maxSide = 1280, quality = 0.8) {
@@ -477,7 +506,7 @@
 
     const DEFAULT_SEED_TREES = [
       {
-        id: '無子檸檬01', species: '無子檸檬', customName: '小綠寶', ageYear: 1, owner: '王小明（內測）', isTestVip: true, fruitPref: '綠檸檬',
+        id: '無子檸檬01', species: '無子檸檬', customName: '小綠寶', ageYear: 1, annualFee: 1800, owner: '王小明（內測）', isTestVip: true, fruitPref: '綠檸檬',
         logs: [
           { date: '2026-11-20', photo: 'https://images.unsplash.com/photo-1587393855524-087f83d95bc9?auto=format&fit=crop&w=900&q=80', text: '施3號肥料(客製)，並混入自製稻殼炭改善根圈透氣。', isCustom: true },
           { date: '2026-11-12', photo: 'https://images.unsplash.com/photo-1590502593747-42a996133562?auto=format&fit=crop&w=900&q=80', text: '株距中間深埋魚內臟補充天然有機養分，新芽抽出。', isCustom: false },
@@ -485,22 +514,22 @@
         ]
       },
       {
-        id: '無子檸檬02', species: '無子檸檬', customName: '', ageYear: 1, owner: '', isTestVip: false, fruitPref: '',
+        id: '無子檸檬02', species: '無子檸檬', customName: '', ageYear: 1, annualFee: 1800, owner: '', isTestVip: false, fruitPref: '',
         logs: [{ date: '2026-11-15', photo: 'https://images.unsplash.com/photo-1590502593747-42a996133562?auto=format&fit=crop&w=900&q=80', text: '株距間深埋魚內臟有機肥。', isCustom: false }]
       },
       {
-        id: '四季檸檬01', species: '四季檸檬', customName: '黃金樹', ageYear: 3, owner: '林雅婷', isTestVip: false, fruitPref: '黃檸檬',
+        id: '四季檸檬01', species: '四季檸檬', customName: '黃金樹', ageYear: 3, annualFee: 1800, owner: '林雅婷', isTestVip: false, fruitPref: '黃檸檬',
         logs: [
           { date: '2026-11-17', photo: 'https://images.unsplash.com/photo-1582979512210-99b6a53386f9?auto=format&fit=crop&w=900&q=80', text: '保留部分果實轉黃(客製)，果皮香氣濃郁。', isCustom: true },
           { date: '2026-11-05', photo: 'https://images.unsplash.com/photo-1587393855524-087f83d95bc9?auto=format&fit=crop&w=900&q=80', text: '進行疏果與枝條微修剪，讓陽光均勻照射果實。', isCustom: false }
         ]
       },
       {
-        id: '四季金桔01', species: '四季金桔', customName: '', ageYear: 2, owner: '', isTestVip: false, fruitPref: '',
+        id: '四季金桔01', species: '四季金桔', customName: '', ageYear: 2, annualFee: 1800, owner: '', isTestVip: false, fruitPref: '',
         logs: [{ date: '2026-11-12', photo: 'https://images.unsplash.com/photo-1611080626919-7cf5a9dbab5b?auto=format&fit=crop&w=900&q=80', text: '進行枝條修剪與除草。', isCustom: false }]
       },
       {
-        id: '桑葚01', species: '桑葚', customName: '', ageYear: 1, owner: '', isTestVip: false, fruitPref: '',
+        id: '桑葚01', species: '桑葚', customName: '', ageYear: 1, annualFee: 1800, owner: '', isTestVip: false, fruitPref: '',
         logs: [{ date: '2026-11-14', photo: 'https://images.unsplash.com/photo-1596591606975-97ee5cef3a1e?auto=format&fit=crop&w=900&q=80', text: '根圈混合稻殼炭與有機質。', isCustom: false }]
       }
     ];
@@ -514,6 +543,7 @@
     let currentMobilePhotoUrl = '';
     let activeHistoryTree = null;
     let activeLogIndex = 0;
+    let managingTreeId = null;
 
     function switchMode(mode) {
       if ((mode === 'mobile' || mode === 'admin') && !isStaffUnlocked) {
@@ -579,6 +609,7 @@
           const treeLogs = (logRows || [])
             .filter(l => l.tree_id === r.id && l.photo_url)
             .map(l => ({
+              id: l.id,
               date: l.log_date || new Date().toISOString().split('T')[0],
               photo: l.photo_url,
               text: l.log_text || '',
@@ -590,10 +621,12 @@
             species: r.species || '無子檸檬',
             customName: r.custom_name || '',
             ageYear: r.age_year || 1,
+            annualFee: typeof r.annual_fee === 'number' ? r.annual_fee : DEFAULT_ANNUAL_FEE,
             owner: r.owner || '',
             isTestVip: Boolean(r.is_test_vip),
             fruitPref: r.fruit_pref || '',
             logs: treeLogs.length > 0 ? treeLogs : [{
+              id: null,
               date: new Date().toISOString().split('T')[0],
               photo: 'https://images.unsplash.com/photo-1590502593747-42a996133562?auto=format&fit=crop&w=900&q=80',
               text: '果樹建檔完成。',
@@ -624,7 +657,7 @@
       filtered.forEach(tree => {
         const isAdopted = Boolean(tree.owner);
         const displayName = isAdopted && tree.customName ? `${tree.customName}（${tree.id}）` : tree.id;
-        const fee = tree.isTestVip ? 0 : (tree.ageYear <= 2 ? 900 : 1800);
+        const fee = getTreeFee(tree);
         const latestLog = tree.logs[0];
 
         const card = document.createElement('div');
@@ -637,7 +670,7 @@
               <span class="absolute bottom-2 right-2 bg-black/65 text-white text-[10px] px-2 py-0.5 rounded">共 ${tree.logs.length} 筆紀錄</span>
             </div>
             <div class="p-3.5">
-              <div class="text-[11px] text-earth-mid">${tree.species} ・ 第 ${tree.ageYear} 年</div>
+              <div class="text-[11px] text-earth-mid">${tree.species} ・ 專屬認養</div>
               <h4 class="font-bold text-base text-earth-dark">${displayName}</h4>
               <p class="text-xs text-stone-600 mt-2 line-clamp-2 bg-warm-cream p-2 rounded border">「${latestLog.text}」</p>
             </div>
@@ -680,7 +713,7 @@
       if (!selectedTreeForAdopt) return;
       const customName = document.getElementById('modal-custom-name').value.trim();
       const fruitPref = document.getElementById('modal-fruit-pref').value;
-      const fee = selectedTreeForAdopt.ageYear <= 2 ? 900 : 1800;
+      const fee = getTreeFee(selectedTreeForAdopt);
       cart.push({ treeId: selectedTreeForAdopt.id, customName, fruitPref, fee });
       updateCartUI();
       closeAdoptModal();
@@ -880,17 +913,105 @@
 
       const filteredAdminTrees = currentAdminFilter === 'ALL' ? trees : trees.filter(t => t.species === currentAdminFilter);
 
-      document.getElementById('admin-tree-tbody').innerHTML = filteredAdminTrees.map(t => `
-        <tr class="border-b hover:bg-warm-cream/60">
-          <td class="p-3 font-bold text-earth-dark">${t.id}</td>
-          <td class="p-3">${t.customName || '-'}</td>
-          <td class="p-3">NT$${t.isTestVip ? 0 : (t.ageYear<=2?900:1800)}</td>
-          <td class="p-3">${t.owner || '未認養'}</td>
-          <td class="p-3 text-right">${t.owner ? `<button type="button" onclick="releaseTree('${t.id}')" class="text-red-600 hover:underline">解除</button>` : `<button type="button" onclick="assignVip('${t.id}')" class="text-amber-700 hover:underline font-medium">設內測</button>`}</td>
-        </tr>
-      `).join('');
+      document.getElementById('admin-tree-tbody').innerHTML = filteredAdminTrees.map(t => {
+        const fee = getTreeFee(t);
+        return `
+          <tr class="border-b hover:bg-warm-cream/60">
+            <td class="p-3 font-bold text-earth-dark">${t.id}</td>
+            <td class="p-3">${t.customName || '-'}</td>
+            <td class="p-3">
+              <button type="button" onclick="editTreeFee('${t.id}')" class="font-bold text-earth-dark underline hover:text-amber-700" title="點擊修改此樹年費">NT$${fee}</button>
+            </td>
+            <td class="p-3">${t.owner || '未認養'}</td>
+            <td class="p-3 text-right space-x-2 whitespace-nowrap">
+              <button type="button" onclick="openManageLogsModal('${t.id}')" class="text-earth-dark hover:underline font-medium">日誌(${t.logs.length})</button>
+              ${t.owner ? `<button type="button" onclick="releaseTree('${t.id}')" class="text-red-600 hover:underline">解除</button>` : `<button type="button" onclick="assignVip('${t.id}')" class="text-amber-700 hover:underline font-medium">設內測</button>`}
+            </td>
+          </tr>
+        `;
+      }).join('');
 
       document.getElementById('line-sim-user').innerHTML = trees.filter(t => t.owner).map(t => `<option value="${t.id}">${t.id} - ${t.owner}</option>`).join('') || '<option>無已認養樹</option>';
+    }
+
+    async function editTreeFee(treeId) {
+      const tree = trees.find(t => t.id === treeId);
+      if (!tree) return;
+      const currentFee = getTreeFee(tree);
+      const input = prompt(`請輸入 ${treeId} 的年費（新台幣元）：`, String(currentFee === 0 ? 1800 : currentFee));
+      if (input === null) return;
+      const num = parseInt(input.trim(), 10);
+      if (Number.isNaN(num) || num < 0) return alert('請輸入有效的數字金額');
+
+      try {
+        await sbUpdate('trees', `id=eq.${encodeURIComponent(treeId)}`, { annual_fee: num });
+        await loadFromSupabase();
+      } catch (err) {
+        alert('更新年費失敗（請確認資料表是否有 annual_fee 欄位）：' + err.message);
+      }
+    }
+
+    async function setAllFeesTo1800() {
+      if (!confirm('確定要將所有非內測果樹年費都設為 NT$ 1,800 嗎？')) return;
+      try {
+        for (const t of trees) {
+          if (!t.isTestVip) {
+            await sbUpdate('trees', `id=eq.${encodeURIComponent(t.id)}`, { annual_fee: 1800 });
+          }
+        }
+        await loadFromSupabase();
+        alert('已將年費統一更新為 NT$ 1,800！');
+      } catch (err) {
+        alert('批次更新失敗：' + err.message);
+      }
+    }
+
+    function openManageLogsModal(treeId) {
+      managingTreeId = treeId;
+      const tree = trees.find(t => t.id === treeId);
+      if (!tree) return;
+      document.getElementById('manage-logs-title').textContent = `${tree.id} 日誌管理（共 ${tree.logs.length} 筆）`;
+      renderManageLogsList();
+      document.getElementById('manage-logs-modal').classList.remove('hidden');
+    }
+
+    function renderManageLogsList() {
+      const tree = trees.find(t => t.id === managingTreeId);
+      const container = document.getElementById('manage-logs-list');
+      if (!tree || !container) return;
+
+      container.innerHTML = tree.logs.map(log => `
+        <div class="flex items-center justify-between gap-3 p-2.5 rounded-xl border bg-warm-cream">
+          <div class="flex items-center gap-3 min-w-0">
+            <img src="${log.photo}" class="w-14 h-14 rounded-lg object-cover shrink-0 bg-stone-200" />
+            <div class="min-w-0">
+              <div class="font-bold text-earth-dark">${log.date} ${log.isCustom ? '<span class="text-amber-700">[客製]</span>' : ''}</div>
+              <p class="text-stone-700 truncate">${log.text}</p>
+            </div>
+          </div>
+          ${log.id ? `<button type="button" onclick="deleteTreeLog(${log.id})" class="px-2.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold shrink-0">刪除</button>` : '<span class="text-stone-400 shrink-0">預設</span>'}
+        </div>
+      `).join('');
+    }
+
+    async function deleteTreeLog(logId) {
+      if (!confirm('確定要刪除這筆誤傳的日誌與照片紀錄嗎？')) return;
+      try {
+        await sbDelete('tree_logs', `id=eq.${logId}`);
+        await loadFromSupabase();
+        renderManageLogsList();
+        const tree = trees.find(t => t.id === managingTreeId);
+        if (tree) {
+          document.getElementById('manage-logs-title').textContent = `${tree.id} 日誌管理（共 ${tree.logs.length} 筆）`;
+        }
+      } catch (err) {
+        alert('刪除失敗：' + err.message);
+      }
+    }
+
+    function closeManageLogsModal() {
+      document.getElementById('manage-logs-modal').classList.add('hidden');
+      managingTreeId = null;
     }
 
     async function addNewTree() {
@@ -901,7 +1022,7 @@
 
       try {
         await sbInsert('trees', {
-          id, species, custom_name: '', age_year: 1, owner: '', is_test_vip: false, fruit_pref: ''
+          id, species, custom_name: '', age_year: 1, annual_fee: 1800, owner: '', is_test_vip: false, fruit_pref: ''
         });
         await sbInsert('tree_logs', {
           tree_id: id, log_date: new Date().toISOString().split('T')[0],
