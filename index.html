@@ -320,17 +320,17 @@
     </div>
   </div>
 
-  <!-- 彈窗 1b：新增「其他」果樹填寫框（必填才能新增） -->
+  <!-- 彈窗 1b：新增「其他」果樹編號輸入框 -->
   <div id="other-tree-modal" class="hidden fixed inset-0 z-50 bg-black/65 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4">
-      <h3 class="font-bold text-lg text-earth-dark">新增「其他」果樹資訊</h3>
+      <h3 class="font-bold text-lg text-earth-dark">新增「其他」果樹編號</h3>
       <p class="text-xs text-stone-600 bg-warm-cream p-2.5 rounded-lg border border-earth leading-relaxed">
-        果園原有的舊果樹需先填寫果樹種類或辨識名稱（例如：紅心芭樂、波羅蜜、龍眼等），未填寫無法新增，建檔將自動套用統一規格圖片 <b>果樹.png</b>。
+        請直接輸入這棵果樹的編號名稱（例如：<b>酪梨01</b>、<b>芭樂01</b>、<b>龍眼01</b>），建檔後即以此編號顯示，並自動套用 <b>./果樹.webp</b>。
       </p>
       <div>
-        <label class="block text-xs font-bold text-earth-dark mb-1">果樹種類 / 辨識名稱（必填）</label>
-        <input type="text" id="other-tree-kind-input" placeholder="例如：紅心芭樂、老欉龍眼、波羅蜜..." class="w-full px-3 py-2 rounded-lg border bg-warm-cream text-sm" />
-        <p id="other-tree-error" class="hidden text-xs text-red-600 font-bold mt-1">請先填寫果樹種類或名稱，否則無法新增！</p>
+        <label class="block text-xs font-bold text-earth-dark mb-1">果樹編號名稱（必填）</label>
+        <input type="text" id="other-tree-kind-input" placeholder="例如：酪梨01" class="w-full px-3 py-2 rounded-lg border bg-warm-cream text-sm" />
+        <p id="other-tree-error" class="hidden text-xs text-red-600 font-bold mt-1">請先輸入果樹編號名稱（例如：酪梨01）！</p>
       </div>
       <div class="flex gap-2">
         <button type="button" onclick="closeOtherTreeModal()" class="flex-1 py-2 rounded border text-xs">取消</button>
@@ -412,17 +412,16 @@
     const DEFAULT_ANNUAL_FEE = 1800;
     const SPECIES_LIST = ['無子檸檬', '四季檸檬', '四季金桔', '桑葚', '其他'];
 
-    // 直接對應 GitHub 同資料夾內的統一規格 PNG 檔案
     const TREE_ASSET_FILES = {
       '無子檸檬': './無子檸檬.png',
       '四季檸檬': './四季檸檬.png',
       '四季金桔': './四季金桔.png',
       '桑葚': './桑葚.png',
-      '其他': './果樹.png'
+      '其他': './果樹.webp'
     };
 
     function getDefaultTreePhotoPath(species) {
-      return TREE_ASSET_FILES[species] || './果樹.png';
+      return TREE_ASSET_FILES[species] || './果樹.webp';
     }
 
     let isStaffUnlocked = sessionStorage.getItem('kx_staff_unlocked') === '1';
@@ -733,7 +732,9 @@
           actionBtnHtml = '<button type="button" disabled class="py-1.5 px-1 bg-amber-100 text-amber-900 border border-amber-300 rounded text-xs font-medium">園主審核中</button>';
         }
 
-        const speciesLabel = tree.species === '其他' && tree.fruitPref ? `其他（${tree.fruitPref}）` : tree.species;
+        const speciesLabel = tree.species === '其他'
+          ? (tree.fruitPref ? `其他（${tree.fruitPref}）` : '其他果樹')
+          : tree.species;
 
         const card = document.createElement('div');
         card.className = 'bg-white rounded-2xl border border-earth overflow-hidden shadow-sm flex flex-col justify-between';
@@ -1126,9 +1127,13 @@
         document.getElementById('other-tree-kind-input').value = '';
         document.getElementById('other-tree-error').classList.add('hidden');
         document.getElementById('other-tree-modal').classList.remove('hidden');
+        document.getElementById('other-tree-kind-input').focus();
         return;
       }
-      createTreeRecord(species, '');
+      const sameSpeciesTrees = trees.filter(t => t.species === species);
+      const nextNum = sameSpeciesTrees.length + 1;
+      const autoId = `${species}${nextNum < 10 ? `0${nextNum}` : nextNum}`;
+      createTreeRecord(species, autoId, '');
     }
 
     function closeOtherTreeModal() {
@@ -1138,28 +1143,34 @@
     async function confirmAddOtherTree() {
       const kindInput = document.getElementById('other-tree-kind-input');
       const errorEl = document.getElementById('other-tree-error');
-      const kindText = kindInput.value.trim();
+      const customId = kindInput.value.trim();
 
-      if (!kindText) {
+      if (!customId) {
         errorEl.classList.remove('hidden');
         kindInput.focus();
         return;
       }
+      if (trees.some(t => t.id === customId)) {
+        errorEl.textContent = `編號「${customId}」已經存在，請輸入其他編號！`;
+        errorEl.classList.remove('hidden');
+        kindInput.focus();
+        return;
+      }
+      errorEl.textContent = '請先輸入果樹編號名稱（例如：酪梨01）！';
       errorEl.classList.add('hidden');
       closeOtherTreeModal();
-      await createTreeRecord('其他', kindText);
+
+      const kindPrefix = customId.replace(/\d+$/, '');
+      await createTreeRecord('其他', customId, kindPrefix);
     }
 
-    async function createTreeRecord(species, otherKindLabel) {
-      const sameSpeciesTrees = trees.filter(t => t.species === species);
-      const nextNum = sameSpeciesTrees.length + 1;
-      const id = `${species}${nextNum < 10 ? `0${nextNum}` : nextNum}`;
+    async function createTreeRecord(species, treeId, otherKindLabel) {
       const photoPath = getDefaultTreePhotoPath(species);
       const fileName = photoPath.replace('./', '');
 
       try {
         await sbInsert('trees', {
-          id,
+          id: treeId,
           species,
           custom_name: '',
           age_year: 1,
@@ -1171,11 +1182,11 @@
         });
 
         const logText = species === '其他'
-          ? `新定植建檔完成（種類：${otherKindLabel}，圖片：${fileName}）。`
+          ? `新定植建檔完成（編號：${treeId}，圖片：${fileName}）。`
           : `新定植建檔完成（圖片：${fileName}）。`;
 
         await sbInsert('tree_logs', {
-          tree_id: id,
+          tree_id: treeId,
           log_date: new Date().toISOString().split('T')[0],
           photo_url: photoPath,
           log_text: logText,
