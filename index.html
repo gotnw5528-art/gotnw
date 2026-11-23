@@ -38,7 +38,7 @@
   <!-- ========================================== -->
   <main id="view-storefront" class="flex-1">
     <header class="bg-[#F7F5EE]/95 border-b border-earth sticky top-12 z-40">
-      <div class="max-w-6xl mx-auto px-4 py-3.5 flex items-center justify-between">
+      <div class="max-w-6xl mx-auto px-4 py-3.5 flex items-center justify-between gap-2">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-full bg-earth-dark text-amber-100 flex items-center justify-center font-bold text-lg shadow-sm">崑</div>
           <div>
@@ -46,9 +46,8 @@
             <p class="text-xs text-earth-mid">嘉義生態果園・一樹一主專屬認養</p>
           </div>
         </div>
-        <button type="button" onclick="toggleCart()" class="relative bg-earth-dark hover:bg-earth-mid text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 transition shadow-sm">
-          <span>認養申請清單</span>
-          <span id="cart-badge" class="bg-amber-500 text-stone-900 font-bold text-xs px-2 py-0.5 rounded-full">0</span>
+        <button type="button" onclick="openLookupModal()" class="bg-earth-dark hover:bg-earth-mid text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-1.5 transition shadow-sm">
+          <span>🔍 認養查詢</span>
         </button>
       </div>
     </header>
@@ -64,6 +63,7 @@
         </p>
         <div class="flex flex-wrap gap-3">
           <a href="#tree-list" class="bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold px-6 py-3 rounded-lg shadow transition">立即挑選果樹編號</a>
+          <button type="button" onclick="openLookupModal()" class="bg-white/15 hover:bg-white/25 text-white border border-white/40 font-bold px-5 py-3 rounded-lg transition">查詢我的認養果樹</button>
         </div>
       </div>
     </section>
@@ -239,7 +239,7 @@
               <button type="button" onclick="openAddTreeFlow()" class="bg-earth-dark hover:bg-earth-mid text-white text-xs font-bold px-3.5 py-1.5 rounded-lg transition shadow-sm">
                 + 新增指定果樹
               </button>
-              <button type="button" onclick="setAllFeesTo1800()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-3.5 py-1.5 rounded-lg transition shadow-sm">
+              <button type="button" onclick="setAllFeesTo1800()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-sm">
                 全部設為 $1800
               </button>
               <button type="button" onclick="lockStaffMode()" class="text-xs px-3 py-1.5 rounded-lg border border-earth bg-warm-cream hover:bg-stone-200 text-stone-700 font-medium transition">
@@ -294,28 +294,64 @@
     </div>
   </main>
 
-  <!-- 彈窗 1：認養申請設定 -->
-  <div id="adopt-modal" class="hidden fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-3.5">
-      <h3 class="font-bold text-lg text-earth-dark">送出認養申請：<span id="modal-tree-code"></span></h3>
+  <!-- 彈窗 1：直接送出認養申請（含防腳本驗證碼） -->
+  <div id="adopt-modal" class="hidden fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-3 my-auto shadow-2xl">
+      <div class="flex justify-between items-center">
+        <h3 class="font-bold text-lg text-earth-dark">申請認養：<span id="modal-tree-code"></span></h3>
+        <button type="button" onclick="closeAdoptModal()" class="text-stone-400 hover:text-stone-700 text-2xl font-bold leading-none">&times;</button>
+      </div>
       <p class="text-xs text-stone-700 bg-amber-50 p-2.5 rounded-lg border border-amber-200 leading-relaxed">
-        送出申請後將進入「園主審核中」，園主與您聯絡確認完即可認養。
+        年費 <b>NT$ <span id="modal-tree-fee">1800</span></b>。送出申請後即進入「園主審核中」，園主與您聯絡確認後正式生效。
       </p>
+
+      <!-- 防機器人蜜罐欄位（人類不可見，若被腳本自動填入則直接攔截） -->
+      <div class="hidden" aria-hidden="true">
+        <input type="text" id="modal-hp-trap" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-2.5">
+        <div>
+          <label class="block text-xs font-bold text-earth-dark mb-1">認養人姓名（必填）</label>
+          <input type="text" id="modal-owner-name" maxlength="20" placeholder="請輸入真實姓名" class="w-full px-3 py-2 rounded-lg border bg-warm-cream text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-earth-dark mb-1">聯絡電話（必填）</label>
+          <input type="tel" id="modal-owner-phone" maxlength="15" placeholder="09xxxxxxxx" class="w-full px-3 py-2 rounded-lg border bg-warm-cream text-sm" />
+        </div>
+      </div>
+
       <div>
         <label class="block text-xs font-bold text-earth-dark mb-1">希望取的專屬樹名</label>
-        <input type="text" id="modal-custom-name" placeholder="例如：小綠寶" class="w-full px-3 py-2 rounded-lg border bg-warm-cream text-sm" />
+        <input type="text" id="modal-custom-name" maxlength="20" placeholder="例如：小綠寶（可留白）" class="w-full px-3 py-2 rounded-lg border bg-warm-cream text-sm" />
       </div>
-      <div>
-        <label class="block text-xs font-bold text-earth-dark mb-1">LINE ID</label>
-        <input type="text" id="modal-line-id" placeholder="請輸入您的 LINE ID（方便園主聯繫）" class="w-full px-3 py-2 rounded-lg border bg-warm-cream text-sm" />
+
+      <div class="grid grid-cols-2 gap-2.5">
+        <div>
+          <label class="block text-xs font-bold text-earth-dark mb-1">LINE ID</label>
+          <input type="text" id="modal-line-id" maxlength="40" placeholder="方便園主聯繫" class="w-full px-3 py-2 rounded-lg border bg-warm-cream text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-earth-dark mb-1">E-mail</label>
+          <input type="email" id="modal-email" maxlength="60" placeholder="example@mail.com" class="w-full px-3 py-2 rounded-lg border bg-warm-cream text-sm" />
+        </div>
       </div>
-      <div>
-        <label class="block text-xs font-bold text-earth-dark mb-1">E-mail</label>
-        <input type="email" id="modal-email" placeholder="example@mail.com" class="w-full px-3 py-2 rounded-lg border bg-warm-cream text-sm" />
+
+      <!-- 防惡意腳本真人認證區 -->
+      <div class="p-3 rounded-xl bg-earth-light border border-earth space-y-1.5">
+        <div class="flex items-center justify-between">
+          <label class="text-xs font-bold text-earth-dark">🛡️ 真人安全驗證（防機器人填寫）</label>
+          <button type="button" onclick="refreshCaptcha()" class="text-[11px] text-earth-mid underline hover:text-earth-dark">換一題</button>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="captcha-question" class="px-3 py-1.5 rounded-lg bg-white border border-earth font-bold text-sm text-earth-dark tracking-wider select-none"></span>
+          <input type="number" id="captcha-answer" placeholder="請輸入計算答案" class="flex-1 px-3 py-1.5 rounded-lg border border-earth bg-white text-sm" />
+        </div>
       </div>
+
       <div class="flex gap-2 pt-1">
-        <button type="button" onclick="closeAdoptModal()" class="flex-1 py-2 rounded border text-xs">取消</button>
-        <button type="button" onclick="confirmAddToCart()" class="flex-1 py-2 rounded bg-earth-dark text-white font-bold text-xs">加入申請清單</button>
+        <button type="button" onclick="closeAdoptModal()" class="flex-1 py-2.5 rounded-lg border text-xs font-medium">取消</button>
+        <button type="button" id="submit-adopt-btn" onclick="submitDirectAdoption()" class="flex-1 py-2.5 rounded-lg bg-earth-dark hover:bg-earth-mid text-white font-bold text-xs transition">確認送出認養申請</button>
       </div>
     </div>
   </div>
@@ -384,19 +420,20 @@
     </div>
   </div>
 
-  <!-- 購物車側邊欄：送出認養申請 -->
-  <div id="cart-drawer" class="hidden fixed inset-0 z-50 bg-black/50 flex justify-end">
-    <div class="bg-white w-full max-w-md h-full flex flex-col">
-      <div class="p-4 bg-earth-dark text-white flex justify-between items-center">
-        <h3 class="font-bold">認養申請清單</h3>
-        <button type="button" onclick="toggleCart()" class="text-xl font-bold">&times;</button>
+  <!-- 彈窗 4：認養進度查詢（依認養人姓名查詢） -->
+  <div id="lookup-modal" class="hidden fixed inset-0 z-50 bg-black/65 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
+      <div class="px-5 py-3.5 bg-earth-dark text-white flex justify-between items-center">
+        <h3 class="font-bold text-base">🔍 認養果樹與審核進度查詢</h3>
+        <button type="button" onclick="closeLookupModal()" class="text-2xl font-bold leading-none">&times;</button>
       </div>
-      <div id="cart-items" class="flex-1 p-4 overflow-y-auto space-y-2 text-sm"></div>
-      <div class="p-4 border-t bg-warm-cream space-y-2.5">
-        <p class="text-xs text-stone-700 leading-relaxed">送出申請後將進入「園主審核中」，園主與您聯絡確認完即可認養。</p>
-        <input type="text" id="checkout-owner-name" placeholder="您的姓名（必填）" class="w-full px-3 py-2 rounded border text-sm bg-white" />
-        <input type="text" id="checkout-owner-phone" placeholder="您的聯絡電話（必填，方便園主聯繫）" class="w-full px-3 py-2 rounded border text-sm bg-white" />
-        <button type="button" onclick="completeCheckout()" class="w-full bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold py-2.5 rounded text-sm transition">送出認養申請（待園主審核）</button>
+      <div class="p-5 space-y-3 overflow-y-auto">
+        <p class="text-xs text-stone-600">請輸入您申請認養時填寫的「認養人姓名」，即可查詢目前認養狀態與生長日誌：</p>
+        <div class="flex gap-2">
+          <input type="text" id="lookup-name-input" onkeydown="if(event.key==='Enter') searchAdoptionByName()" placeholder="例如：王小明" class="flex-1 px-3.5 py-2 rounded-lg border border-earth bg-warm-cream text-sm" />
+          <button type="button" onclick="searchAdoptionByName()" class="px-4 py-2 rounded-lg bg-earth-dark hover:bg-earth-mid text-white font-bold text-sm transition">查詢</button>
+        </div>
+        <div id="lookup-results" class="space-y-2.5 pt-1 text-xs"></div>
       </div>
     </div>
   </div>
@@ -465,6 +502,11 @@
       if (!tree.owner) return 'available';
       if (tree.adoptStatus === 'pending') return 'pending';
       return 'approved';
+    }
+
+    function extractOwnerPureName(ownerField) {
+      if (!ownerField) return '';
+      return String(ownerField).split('(')[0].replace('（內測）', '').trim();
     }
 
     const sbHeaders = {
@@ -591,8 +633,9 @@
     let trees = [];
     let currentFilter = 'ALL';
     let currentAdminFilter = 'ALL';
-    let cart = [];
     let selectedTreeForAdopt = null;
+    let captchaExpectedAnswer = null;
+    let adoptModalOpenedAt = 0;
     let currentMobilePhotoBlob = null;
     let currentMobilePhotoUrl = '';
     let activeHistoryTree = null;
@@ -624,14 +667,6 @@
       if (targetBtn) targetBtn.className = 'px-3 py-1.5 rounded-md font-medium bg-amber-500 text-stone-900 transition';
       if (mode === 'mobile') renderMobileSelect();
       if (mode === 'admin') renderAdminDashboard();
-    }
-
-    function toggleCart(force = null) {
-      const drawer = document.getElementById('cart-drawer');
-      if (!drawer) return;
-      if (force === true) drawer.classList.remove('hidden');
-      else if (force === false) drawer.classList.add('hidden');
-      else drawer.classList.toggle('hidden');
     }
 
     async function loadFromSupabase() {
@@ -778,6 +813,20 @@
       renderStorefrontTrees();
     }
 
+    function refreshCaptcha() {
+      const a = Math.floor(Math.random() * 9) + 2;
+      const b = Math.floor(Math.random() * 9) + 2;
+      const useMultiply = Math.random() > 0.5;
+      if (useMultiply) {
+        captchaExpectedAnswer = a * b;
+        document.getElementById('captcha-question').textContent = `${a} × ${b} = ?`;
+      } else {
+        captchaExpectedAnswer = a + b;
+        document.getElementById('captcha-question').textContent = `${a} + ${b} = ?`;
+      }
+      document.getElementById('captcha-answer').value = '';
+    }
+
     function openAdoptModal(treeId) {
       selectedTreeForAdopt = trees.find(t => t.id === treeId);
       if (!selectedTreeForAdopt) return;
@@ -785,75 +834,157 @@
         return alert('此果樹目前已有認養申請或已認養。');
       }
       document.getElementById('modal-tree-code').textContent = selectedTreeForAdopt.id;
+      document.getElementById('modal-tree-fee').textContent = getTreeFee(selectedTreeForAdopt);
+      document.getElementById('modal-hp-trap').value = '';
+      document.getElementById('modal-owner-name').value = '';
+      document.getElementById('modal-owner-phone').value = '';
       document.getElementById('modal-custom-name').value = '';
       document.getElementById('modal-line-id').value = '';
       document.getElementById('modal-email').value = '';
+      adoptModalOpenedAt = Date.now();
+      refreshCaptcha();
       document.getElementById('adopt-modal').classList.remove('hidden');
     }
 
-    function closeAdoptModal() { document.getElementById('adopt-modal').classList.add('hidden'); }
+    function closeAdoptModal() {
+      document.getElementById('adopt-modal').classList.add('hidden');
+      selectedTreeForAdopt = null;
+    }
 
-    function confirmAddToCart() {
+    async function submitDirectAdoption() {
       if (!selectedTreeForAdopt) return;
+
+      // 1. 蜜罐欄位檢查（擋自動填表腳本）
+      if (document.getElementById('modal-hp-trap').value !== '') {
+        return;
+      }
+
+      // 2. 填寫時間過短檢查（人類不可能在 1.5 秒內填完並算完驗證碼）
+      if (Date.now() - adoptModalOpenedAt < 1500) {
+        return alert('操作過快，請稍候再試。');
+      }
+
+      // 3. 30 秒同瀏覽器冷卻防洗版檢查
+      const lastSubmitTs = Number(localStorage.getItem('kx_last_adopt_ts') || '0');
+      const waitSec = Math.ceil((30000 - (Date.now() - lastSubmitTs)) / 1000);
+      if (waitSec > 0) {
+        return alert(`為防止惡意重複申請，請於 ${waitSec} 秒後再送出下一筆申請。`);
+      }
+
+      // 4. 算數驗證碼比對
+      const userAns = parseInt(document.getElementById('captcha-answer').value.trim(), 10);
+      if (Number.isNaN(userAns) || userAns !== captchaExpectedAnswer) {
+        refreshCaptcha();
+        return alert('真人安全驗證答案不正確，請重新計算後再送出！');
+      }
+
+      const name = document.getElementById('modal-owner-name').value.trim();
+      const phone = document.getElementById('modal-owner-phone').value.trim().replace(/[-\s]/g, '');
       const customName = document.getElementById('modal-custom-name').value.trim();
       const lineId = document.getElementById('modal-line-id').value.trim();
       const email = document.getElementById('modal-email').value.trim();
-      const fee = getTreeFee(selectedTreeForAdopt);
 
-      cart = cart.filter(c => c.treeId !== selectedTreeForAdopt.id);
-      cart.push({ treeId: selectedTreeForAdopt.id, customName, lineId, email, fee });
-      updateCartUI();
-      closeAdoptModal();
-      toggleCart(true);
-    }
+      if (!name || name.length < 2) {
+        return alert('請填寫正確的認養人姓名！');
+      }
+      if (!/^09\d{8}$/.test(phone)) {
+        return alert('請填寫有效的台灣手機號碼（09 開頭共 10 碼），方便園主審核聯繫！');
+      }
 
-    function removeFromCart(treeId) {
-      cart = cart.filter(c => c.treeId !== treeId);
-      updateCartUI();
-    }
-
-    function updateCartUI() {
-      document.getElementById('cart-badge').textContent = cart.length;
-      document.getElementById('cart-items').innerHTML = cart.map(i => `
-        <div class="p-2.5 border rounded-lg bg-warm-cream text-xs flex justify-between items-start gap-2">
-          <div>
-            <b>${i.treeId}</b>（希望樹名：${i.customName || '未填'}）<br/>
-            <span class="text-stone-600">LINE ID：${i.lineId || '未填'} ・ E-mail：${i.email || '未填'}</span><br/>
-            <span class="text-earth-dark font-bold">年費 NT$${i.fee}</span>
-          </div>
-          <button type="button" onclick="removeFromCart('${i.treeId}')" class="text-red-600 hover:underline shrink-0">移除</button>
-        </div>
-      `).join('') || '<p class="text-xs text-stone-500">申請清單目前是空的</p>';
-    }
-
-    async function completeCheckout() {
-      if (cart.length === 0) return alert('請先挑選要申請認養的果樹');
-      const name = document.getElementById('checkout-owner-name').value.trim();
-      const phone = document.getElementById('checkout-owner-phone').value.trim();
-      if (!name || !phone) return alert('請填寫您的姓名與聯絡電話，方便園主審核聯繫！');
+      const btn = document.getElementById('submit-adopt-btn');
+      btn.disabled = true;
+      btn.textContent = '送出申請中...';
 
       try {
-        for (const item of cart) {
-          const contactParts = [
-            phone,
-            item.lineId ? `LINE:${item.lineId}` : '',
-            item.email ? `Email:${item.email}` : ''
-          ].filter(Boolean).join(' / ');
-
-          await sbUpdate('trees', `id=eq.${encodeURIComponent(item.treeId)}`, {
-            owner: `${name} (${contactParts})`,
-            custom_name: item.customName,
-            adopt_status: 'pending'
-          });
+        // 再次確認雲端最新狀態是否仍為開放認養（防止兩人同時搶同一棵）
+        const latestRows = await sbSelect('trees', `?id=eq.${encodeURIComponent(selectedTreeForAdopt.id)}&select=owner,adopt_status`);
+        if (latestRows && latestRows[0] && latestRows[0].owner) {
+          closeAdoptModal();
+          await loadFromSupabase();
+          return alert('抱歉，這棵果樹剛剛已被其他認養人搶先申請囉！');
         }
-        cart = [];
-        updateCartUI();
-        toggleCart(false);
+
+        const contactParts = [
+          phone,
+          lineId ? `LINE:${lineId}` : '',
+          email ? `Email:${email}` : ''
+        ].filter(Boolean).join(' / ');
+
+        await sbUpdate('trees', `id=eq.${encodeURIComponent(selectedTreeForAdopt.id)}`, {
+          owner: `${name} (${contactParts})`,
+          custom_name: customName,
+          adopt_status: 'pending'
+        });
+
+        localStorage.setItem('kx_last_adopt_ts', String(Date.now()));
+        const submittedTreeId = selectedTreeForAdopt.id;
+        closeAdoptModal();
         await loadFromSupabase();
-        alert('送出申請後將進入「園主審核中」，園主與您聯絡確認完即可認養。');
+        alert(`已成功送出「${submittedTreeId}」的認養申請！\n目前進入「園主審核中」，園主與您聯絡確認完即可正式認養；您也可隨時透過右上角「認養查詢」輸入姓名查看進度。`);
       } catch (err) {
         alert('送出失敗：' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '確認送出認養申請';
       }
+    }
+
+    function openLookupModal() {
+      document.getElementById('lookup-name-input').value = '';
+      document.getElementById('lookup-results').innerHTML = '';
+      document.getElementById('lookup-modal').classList.remove('hidden');
+      document.getElementById('lookup-name-input').focus();
+    }
+
+    function closeLookupModal() {
+      document.getElementById('lookup-modal').classList.add('hidden');
+    }
+
+    function searchAdoptionByName() {
+      const queryName = document.getElementById('lookup-name-input').value.trim();
+      const resultBox = document.getElementById('lookup-results');
+      if (!queryName) {
+        resultBox.innerHTML = '<p class="text-red-600 font-bold">請先輸入認養人姓名再查詢。</p>';
+        return;
+      }
+
+      const matched = trees.filter(t => {
+        if (!t.owner) return false;
+        const pureName = extractOwnerPureName(t.owner);
+        return pureName === queryName || pureName.includes(queryName);
+      });
+
+      if (matched.length === 0) {
+        resultBox.innerHTML = `<div class="p-3.5 rounded-xl bg-warm-cream border border-earth text-stone-600">找不到姓名包含「<b>${queryName}</b>」的認養紀錄，請確認是否與申請時填寫的姓名一致。</div>`;
+        return;
+      }
+
+      resultBox.innerHTML = matched.map(t => {
+        const state = getTreeState(t);
+        const isApproved = state === 'approved';
+        const statusBadge = isApproved
+          ? '<span class="px-2 py-0.5 rounded-full bg-emerald-600 text-white font-bold text-[11px]">✅ 已核准認養</span>'
+          : '<span class="px-2 py-0.5 rounded-full bg-amber-500 text-stone-950 font-bold text-[11px]">⏳ 園主審核中</span>';
+        const fallbackImg = getDefaultTreePhotoPath(t.species);
+        const pureName = extractOwnerPureName(t.owner);
+
+        return `
+          <div class="p-3 rounded-xl border border-earth bg-warm-cream flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <img src="${t.logs[0].photo}" onerror="this.onerror=null;this.src='${fallbackImg}';" class="w-14 h-14 rounded-lg object-cover shrink-0 bg-stone-200" />
+              <div class="min-w-0">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <b class="text-sm text-earth-dark">${t.id}</b>
+                  ${statusBadge}
+                </div>
+                <div class="text-stone-700 mt-0.5">認養人：<b>${pureName}</b> ・ 專屬樹名：<b>${t.customName || '未設定'}</b></div>
+                <div class="text-[11px] text-earth-mid mt-0.5">最新紀錄（${t.logs[0].date}）：${t.logs[0].text}</div>
+              </div>
+            </div>
+            <button type="button" onclick="closeLookupModal(); openHistoryModal('${t.id}');" class="px-3 py-1.5 rounded-lg bg-earth-dark hover:bg-earth-mid text-white font-bold shrink-0">查看日誌</button>
+          </div>
+        `;
+      }).join('');
     }
 
     function openHistoryModal(id) {
@@ -865,7 +996,7 @@
         ? `${activeHistoryTree.customName}（${activeHistoryTree.id}）` : activeHistoryTree.id;
       document.getElementById('hist-title').textContent = `${displayName} 生長履歷`;
       document.getElementById('hist-owner-badge').textContent =
-        state === 'approved' ? `主人：${activeHistoryTree.owner}` : (state === 'pending' ? '認養審核中' : '開放認養中');
+        state === 'approved' ? `主人：${extractOwnerPureName(activeHistoryTree.owner)}` : (state === 'pending' ? '認養審核中' : '開放認養中');
       document.getElementById('history-modal').classList.remove('hidden');
       renderHistoryView();
     }
@@ -913,10 +1044,16 @@
     function closeHistoryModal() { document.getElementById('history-modal').classList.add('hidden'); activeHistoryTree = null; }
 
     document.addEventListener('keydown', function(e) {
-      if (document.getElementById('history-modal').classList.contains('hidden')) return;
-      if (e.key === 'ArrowLeft') navigateHistory(-1);
-      if (e.key === 'ArrowRight') navigateHistory(1);
-      if (e.key === 'Escape') closeHistoryModal();
+      if (!document.getElementById('history-modal').classList.contains('hidden')) {
+        if (e.key === 'ArrowLeft') navigateHistory(-1);
+        if (e.key === 'ArrowRight') navigateHistory(1);
+        if (e.key === 'Escape') closeHistoryModal();
+      } else if (e.key === 'Escape') {
+        closeAdoptModal();
+        closeLookupModal();
+        closeOtherTreeModal();
+        closeManageLogsModal();
+      }
     });
 
     function renderMobileSelect() {
