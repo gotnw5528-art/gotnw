@@ -239,7 +239,7 @@
               <button type="button" onclick="openAddTreeFlow()" class="bg-earth-dark hover:bg-earth-mid text-white text-xs font-bold px-3.5 py-1.5 rounded-lg transition shadow-sm">
                 + 新增指定果樹
               </button>
-              <button type="button" onclick="setAllFeesTo1800()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-sm">
+              <button type="button" onclick="setAllFeesTo1800()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-3.5 py-1.5 rounded-lg transition shadow-sm">
                 全部設為 $1800
               </button>
               <button type="button" onclick="lockStaffMode()" class="text-xs px-3 py-1.5 rounded-lg border border-earth bg-warm-cream hover:bg-stone-200 text-stone-700 font-medium transition">
@@ -325,7 +325,7 @@
     <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4">
       <h3 class="font-bold text-lg text-earth-dark">新增「其他」果樹編號</h3>
       <p class="text-xs text-stone-600 bg-warm-cream p-2.5 rounded-lg border border-earth leading-relaxed">
-        請直接輸入這棵果樹的編號名稱（例如：<b>酪梨01</b>、<b>芭樂01</b>、<b>龍眼01</b>），建檔後即以此編號顯示，並自動套用 <b>./果樹.webp</b>。
+        請直接輸入這棵果樹的編號名稱（例如：<b>酪梨01</b>、<b>芭樂01</b>、<b>龍眼01</b>），建檔後即以此編號顯示，並自動套用 <b>./果樹.png</b>。
       </p>
       <div>
         <label class="block text-xs font-bold text-earth-dark mb-1">果樹編號名稱（必填）</label>
@@ -417,11 +417,11 @@
       '四季檸檬': './四季檸檬.png',
       '四季金桔': './四季金桔.png',
       '桑葚': './桑葚.png',
-      '其他': './果樹.webp'
+      '其他': './果樹.png'
     };
 
     function getDefaultTreePhotoPath(species) {
-      return TREE_ASSET_FILES[species] || './果樹.webp';
+      return TREE_ASSET_FILES[species] || './果樹.png';
     }
 
     let isStaffUnlocked = sessionStorage.getItem('kx_staff_unlocked') === '1';
