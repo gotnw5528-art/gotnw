@@ -1,14 +1,23 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
- <link rel="icon" type="image/png" href="./logo.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>崑祥農產行｜果樹專屬認養與生長數位履歷</title>
+  <link rel="icon" type="image/png" href="./logo.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Noto Sans TC', sans-serif; background-color: #F7F5EE; color: #2C362B; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #F7F5EE;
+      color: #2C362B;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
     .bg-earth-dark { background-color: #2D4739; }
     .bg-earth-mid { background-color: #4A6B53; }
     .bg-earth-light { background-color: #E8EFE6; }
@@ -16,12 +25,123 @@
     .text-earth-dark { color: #2D4739; }
     .text-earth-mid { color: #4A6B53; }
     .border-earth { border-color: #CBD5C8; }
+
+    /* 基礎排版保底樣式（防止 Tailwind CDN 載入慢或失敗時跑版） */
+    .kx-container {
+      max-width: 1152px;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+    .kx-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background-color: #1E3026;
+      color: #FFFFFF;
+      padding: 10px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .kx-header {
+      position: sticky;
+      top: 44px;
+      z-index: 40;
+      background-color: rgba(247, 245, 238, 0.97);
+      border-bottom: 1px solid #CBD5C8;
+      backdrop-filter: blur(6px);
+    }
+    .kx-header-inner {
+      max-width: 1152px;
+      margin: 0 auto;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .kx-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+    .kx-logo-wrap {
+      width: 52px;
+      height: 52px;
+      border-radius: 9999px;
+      background-color: #F7F5EE;
+      border: 2px solid #2D4739;
+      overflow: hidden;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    .kx-logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1.25);
+    }
+    .kx-btn-primary {
+      background-color: #2D4739;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 9999px;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .kx-btn-primary:hover { background-color: #4A6B53; }
+    .kx-hero {
+      position: relative;
+      background-color: #2D4739;
+      color: #FFFFFF;
+      overflow: hidden;
+      padding: 64px 16px;
+    }
+    .kx-hero-bg {
+      position: absolute;
+      inset: 0;
+      opacity: 0.32;
+      background-image: url('./四季檸檬.png');
+      background-size: cover;
+      background-position: center;
+    }
+    .kx-hero-content {
+      position: relative;
+      max-width: 1152px;
+      margin: 0 auto;
+    }
+    .kx-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+    .kx-grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+    }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body>
 
   <!-- 頂部：品牌狀態列（2、3 端預設隱藏，僅管理員開啟後顯示） -->
-  <div class="sticky top-0 z-50 bg-[#1E3026] text-white shadow-md px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
+  <div class="kx-topbar">
     <div class="flex items-center gap-2">
       <span id="db-status-badge" class="bg-amber-500 text-stone-900 text-xs font-bold px-2 py-0.5 rounded">雲端連線中...</span>
       <span class="font-bold text-sm md:text-base tracking-wide">崑祥農產行數位管理系統</span>
@@ -38,51 +158,51 @@
   <!-- 模式 1：品牌電商與果樹認養前台               -->
   <!-- ========================================== -->
   <main id="view-storefront" class="flex-1">
-    <header class="bg-[#F7F5EE]/95 border-b border-earth sticky top-12 z-40">
-      <div class="max-w-6xl mx-auto px-4 py-3.5 flex items-center justify-between gap-2">
-        <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-full bg-[#F7F5EE] border border-earth overflow-hidden flex items-center justify-center shadow-sm shrink-0">
-  <img src="./logo.png" alt="崑祥農產行 Logo" class="w-full h-full object-cover scale-125" />
-</div></div>
+    <header class="kx-header">
+      <div class="kx-header-inner">
+        <div class="kx-brand">
+          <div class="kx-logo-wrap">
+            <img src="./logo.png" alt="崑祥農產行 Logo" class="kx-logo-img" />
+          </div>
           <div>
-            <h1 class="font-bold text-lg text-earth-dark tracking-wider">崑祥農產行</h1>
-            <p class="text-xs text-earth-mid">嘉義生態果園・一樹一主專屬認養</p>
+            <h1 class="font-bold text-lg text-earth-dark tracking-wider leading-tight m-0">崑祥農產行</h1>
+            <p class="text-xs text-earth-mid m-0">嘉義生態果園・一樹一主專屬認養</p>
           </div>
         </div>
-        <button type="button" onclick="openLookupModal()" class="bg-earth-dark hover:bg-earth-mid text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-1.5 transition shadow-sm">
+        <button type="button" onclick="openLookupModal()" class="kx-btn-primary">
           <span>🔍 認養查詢</span>
         </button>
       </div>
     </header>
 
     <!-- 首頁大圖 Hero Section -->
-    <section class="relative bg-earth-dark text-white overflow-hidden">
-      <div class="absolute inset-0 opacity-35 bg-[url('./四季檸檬.png')] bg-cover bg-center"></div>
-      <div class="relative max-w-6xl mx-auto px-4 py-16 md:py-24">
-        <span class="inline-block bg-amber-500/90 text-stone-950 font-bold text-xs px-3 py-1 rounded-full mb-4">無子檸檬・四季檸檬・四季金桔・桑葚・其他果樹</span>
+    <section class="kx-hero">
+      <div class="kx-hero-bg"></div>
+      <div class="kx-hero-content">
+        <span class="inline-block bg-amber-500/95 text-stone-950 font-bold text-xs px-3 py-1 rounded-full mb-4">無子檸檬・四季檸檬・四季金桔・桑葚・其他果樹</span>
         <h2 class="text-3xl md:text-5xl font-bold leading-tight mb-4 max-w-2xl">在嘉義陽光與生物炭沃土中，<br/>認養一棵寫著你名字的果樹</h2>
         <p class="text-stone-200 text-base md:text-lg max-w-xl mb-8 leading-relaxed">
           一對一專屬認養制。送出認養申請並與園主聯絡確認後，即可為你的果樹掛上專屬樹名、透過官方 LINE 隨時查看田間最新生長日誌！
         </p>
         <div class="flex flex-wrap gap-3">
-          <a href="#tree-list" class="bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold px-6 py-3 rounded-lg shadow transition">立即挑選果樹編號</a>
-          <button type="button" onclick="openLookupModal()" class="bg-white/15 hover:bg-white/25 text-white border border-white/40 font-bold px-5 py-3 rounded-lg transition">查詢我的認養果樹</button>
+          <a href="#tree-list" class="bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold px-6 py-3 rounded-lg shadow transition no-underline">立即挑選果樹編號</a>
+          <button type="button" onclick="openLookupModal()" class="bg-white/15 hover:bg-white/25 text-white border border-white/40 font-bold px-5 py-3 rounded-lg transition cursor-pointer">查詢我的認養果樹</button>
         </div>
       </div>
     </section>
 
     <!-- 認養方案與規則說明 -->
-    <section id="adopt-rules" class="max-w-6xl mx-auto px-4 py-14">
+    <section id="adopt-rules" class="kx-container py-14">
       <div class="text-center mb-10">
         <h3 class="text-2xl md:text-3xl font-bold text-earth-dark mb-2">一樹一主・透明認養與採收規則</h3>
         <p class="text-earth-mid text-sm md:text-base">把「養樹體驗」與「果實採購」分開，沒有強迫推銷，只有最真實的土地陪伴</p>
       </div>
 
-      <div class="grid md:grid-cols-3 gap-6">
+      <div class="kx-grid-3">
         <div class="bg-white rounded-2xl p-6 border border-earth shadow-sm">
           <div class="w-10 h-10 rounded-lg bg-earth-light text-earth-dark font-bold flex items-center justify-center mb-4">01</div>
           <h4 class="font-bold text-lg text-earth-dark mb-2">專屬認養年費與審核</h4>
-          <ul class="space-y-2 text-sm text-stone-700 leading-relaxed">
+          <ul class="space-y-2 text-sm text-stone-700 leading-relaxed pl-0 list-none">
             <li class="p-2.5 bg-amber-50 rounded-lg border border-amber-200">
               <span class="font-bold text-amber-900">專屬認養年費：NT$ 1,800 / 年</span><br/>
               <span class="text-xs text-stone-600">送出申請後，由園主聯繫確認並審核通過即正式生效。</span>
@@ -97,7 +217,7 @@
         <div class="bg-white rounded-2xl p-6 border border-earth shadow-sm">
           <div class="w-10 h-10 rounded-lg bg-earth-light text-earth-dark font-bold flex items-center justify-center mb-4">02</div>
           <h4 class="font-bold text-lg text-earth-dark mb-2">專屬命名與客製化培養</h4>
-          <ul class="space-y-2 text-sm text-stone-700 leading-relaxed">
+          <ul class="space-y-2 text-sm text-stone-700 leading-relaxed pl-0 list-none">
             <li>• <strong>專屬樹名：</strong>審核通過後正式啟用專屬樹名，到期放棄則回歸原編號。</li>
             <li>• <strong>間接介入：</strong>可與園主討論施肥，具燒根風險（如未發酵生糞）園主保有否決權。</li>
             <li>• <strong>免費 LINE 查詢：</strong>隨時於官方 LINE 點選選單免費查看最新照片。</li>
@@ -107,7 +227,7 @@
         <div class="bg-white rounded-2xl p-6 border border-earth shadow-sm">
           <div class="w-10 h-10 rounded-lg bg-earth-light text-earth-dark font-bold flex items-center justify-center mb-4">03</div>
           <h4 class="font-bold text-lg text-earth-dark mb-2">親子自採與優先購買</h4>
-          <ul class="space-y-2 text-sm text-stone-700 leading-relaxed">
+          <ul class="space-y-2 text-sm text-stone-700 leading-relaxed pl-0 list-none">
             <li>• <strong>指定熟度：</strong>可與園主溝通留果成熟階段。</li>
             <li>• <strong>親子自採：</strong>歡迎帶家人來園親自剪果。</li>
             <li>• <strong>透明計價：</strong>依當日<strong>北農批發均價 110%</strong> 計價。</li>
@@ -118,23 +238,23 @@
 
     <!-- 果樹認養列表 -->
     <section id="tree-list" class="bg-earth-light/60 border-y border-earth py-14">
-      <div class="max-w-6xl mx-auto px-4">
+      <div class="kx-container">
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
           <div>
             <h3 class="text-2xl md:text-3xl font-bold text-earth-dark mb-1">園區果樹即時名錄</h3>
             <p class="text-sm text-earth-mid">點擊「生長日誌」可檢視大圖與歷次照片切換對照</p>
           </div>
           <div class="flex flex-wrap gap-2 text-sm" id="species-filters">
-            <button type="button" onclick="filterTrees('ALL')" id="filter-ALL" class="filter-btn px-3.5 py-1.5 rounded-full bg-earth-dark text-white font-medium transition">全部果樹</button>
-            <button type="button" onclick="filterTrees('無子檸檬')" id="filter-無子檸檬" class="filter-btn px-3.5 py-1.5 rounded-full bg-white text-earth-dark border border-earth hover:bg-earth-light transition">無子檸檬</button>
-            <button type="button" onclick="filterTrees('四季檸檬')" id="filter-四季檸檬" class="filter-btn px-3.5 py-1.5 rounded-full bg-white text-earth-dark border border-earth hover:bg-earth-light transition">四季檸檬</button>
-            <button type="button" onclick="filterTrees('四季金桔')" id="filter-四季金桔" class="filter-btn px-3.5 py-1.5 rounded-full bg-white text-earth-dark border border-earth hover:bg-earth-light transition">四季金桔</button>
-            <button type="button" onclick="filterTrees('桑葚')" id="filter-桑葚" class="filter-btn px-3.5 py-1.5 rounded-full bg-white text-earth-dark border border-earth hover:bg-earth-light transition">桑葚</button>
-            <button type="button" onclick="filterTrees('其他')" id="filter-其他" class="filter-btn px-3.5 py-1.5 rounded-full bg-white text-earth-dark border border-earth hover:bg-earth-light transition">其他</button>
+            <button type="button" onclick="filterTrees('ALL')" id="filter-ALL" class="filter-btn px-3.5 py-1.5 rounded-full bg-earth-dark text-white font-medium transition cursor-pointer">全部果樹</button>
+            <button type="button" onclick="filterTrees('無子檸檬')" id="filter-無子檸檬" class="filter-btn px-3.5 py-1.5 rounded-full bg-white text-earth-dark border border-earth hover:bg-earth-light transition cursor-pointer">無子檸檬</button>
+            <button type="button" onclick="filterTrees('四季檸檬')" id="filter-四季檸檬" class="filter-btn px-3.5 py-1.5 rounded-full bg-white text-earth-dark border border-earth hover:bg-earth-light transition cursor-pointer">四季檸檬</button>
+            <button type="button" onclick="filterTrees('四季金桔')" id="filter-四季金桔" class="filter-btn px-3.5 py-1.5 rounded-full bg-white text-earth-dark border border-earth hover:bg-earth-light transition cursor-pointer">四季金桔</button>
+            <button type="button" onclick="filterTrees('桑葚')" id="filter-桑葚" class="filter-btn px-3.5 py-1.5 rounded-full bg-white text-earth-dark border border-earth hover:bg-earth-light transition cursor-pointer">桑葚</button>
+            <button type="button" onclick="filterTrees('其他')" id="filter-其他" class="filter-btn px-3.5 py-1.5 rounded-full bg-white text-earth-dark border border-earth hover:bg-earth-light transition cursor-pointer">其他</button>
           </div>
         </div>
 
-        <div id="trees-grid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5"></div>
+        <div id="trees-grid" class="kx-grid-4"></div>
       </div>
     </section>
 
@@ -242,7 +362,7 @@
               <button type="button" onclick="openAddTreeFlow()" class="bg-earth-dark hover:bg-earth-mid text-white text-xs font-bold px-3.5 py-1.5 rounded-lg transition shadow-sm">
                 + 新增指定果樹
               </button>
-              <button type="button" onclick="setAllFeesTo1800()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-sm">
+              <button type="button" onclick="setAllFeesTo1800()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-3.5 py-1.5 rounded-lg transition shadow-sm">
                 全部設為 $1800
               </button>
               <button type="button" onclick="lockStaffMode()" class="text-xs px-3 py-1.5 rounded-lg border border-earth bg-warm-cream hover:bg-stone-200 text-stone-700 font-medium transition">
@@ -308,7 +428,6 @@
         年費 <b>NT$ <span id="modal-tree-fee">1800</span></b>。送出申請後即進入「園主審核中」，園主與您聯絡確認後正式生效。
       </p>
 
-      <!-- 防機器人蜜罐欄位（人類不可見，若被腳本自動填入則直接攔截） -->
       <div class="hidden" aria-hidden="true">
         <input type="text" id="modal-hp-trap" tabindex="-1" autocomplete="off" />
       </div>
@@ -340,7 +459,6 @@
         </div>
       </div>
 
-      <!-- 防惡意腳本真人認證區 -->
       <div class="p-3 rounded-xl bg-earth-light border border-earth space-y-1.5">
         <div class="flex items-center justify-between">
           <label class="text-xs font-bold text-earth-dark">🛡️ 真人安全驗證（防機器人填寫）</label>
@@ -760,7 +878,7 @@
         const fallbackImg = getDefaultTreePhotoPath(tree.species);
 
         let badgeHtml = '<span class="absolute top-2 left-2 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white">開放認養</span>';
-        let actionBtnHtml = `<button type="button" onclick="openAdoptModal('${tree.id}')" class="py-1.5 px-1 bg-earth-dark hover:bg-earth-mid text-white rounded text-xs font-bold transition">申請認養</button>`;
+        let actionBtnHtml = `<button type="button" onclick="openAdoptModal('${tree.id}')" class="py-1.5 px-1 bg-earth-dark hover:bg-earth-mid text-white rounded text-xs font-bold transition cursor-pointer">申請認養</button>`;
 
         if (isApproved) {
           badgeHtml = '<span class="absolute top-2 left-2 text-[11px] font-bold px-2 py-0.5 rounded-full bg-stone-800 text-amber-300">已認養</span>';
@@ -795,7 +913,7 @@
               <span class="font-bold text-earth-dark">NT$ ${fee}</span>
             </div>
             <div class="grid grid-cols-2 gap-1.5">
-              <button type="button" onclick="openHistoryModal('${tree.id}')" class="py-1.5 px-1 border border-earth text-earth-dark rounded text-xs font-bold hover:bg-earth-light transition">生長日誌 (${tree.logs.length})</button>
+              <button type="button" onclick="openHistoryModal('${tree.id}')" class="py-1.5 px-1 border border-earth text-earth-dark rounded text-xs font-bold hover:bg-earth-light transition cursor-pointer">生長日誌 (${tree.logs.length})</button>
               ${actionBtnHtml}
             </div>
           </div>
@@ -810,8 +928,8 @@
         const btn = document.getElementById('filter-' + s);
         if (!btn) return;
         btn.className = s === species
-          ? 'filter-btn px-3.5 py-1.5 rounded-full bg-earth-dark text-white font-medium transition'
-          : 'filter-btn px-3.5 py-1.5 rounded-full bg-white text-earth-dark border border-earth hover:bg-earth-light transition';
+          ? 'filter-btn px-3.5 py-1.5 rounded-full bg-earth-dark text-white font-medium transition cursor-pointer'
+          : 'filter-btn px-3.5 py-1.5 rounded-full bg-white text-earth-dark border border-earth hover:bg-earth-light transition cursor-pointer';
       });
       renderStorefrontTrees();
     }
@@ -857,24 +975,20 @@
     async function submitDirectAdoption() {
       if (!selectedTreeForAdopt) return;
 
-      // 1. 蜜罐欄位檢查（擋自動填表腳本）
       if (document.getElementById('modal-hp-trap').value !== '') {
         return;
       }
 
-      // 2. 填寫時間過短檢查（人類不可能在 1.5 秒內填完並算完驗證碼）
       if (Date.now() - adoptModalOpenedAt < 1500) {
         return alert('操作過快，請稍候再試。');
       }
 
-      // 3. 30 秒同瀏覽器冷卻防洗版檢查
       const lastSubmitTs = Number(localStorage.getItem('kx_last_adopt_ts') || '0');
       const waitSec = Math.ceil((30000 - (Date.now() - lastSubmitTs)) / 1000);
       if (waitSec > 0) {
         return alert(`為防止惡意重複申請，請於 ${waitSec} 秒後再送出下一筆申請。`);
       }
 
-      // 4. 算數驗證碼比對
       const userAns = parseInt(document.getElementById('captcha-answer').value.trim(), 10);
       if (Number.isNaN(userAns) || userAns !== captchaExpectedAnswer) {
         refreshCaptcha();
@@ -899,7 +1013,6 @@
       btn.textContent = '送出申請中...';
 
       try {
-        // 再次確認雲端最新狀態是否仍為開放認養（防止兩人同時搶同一棵）
         const latestRows = await sbSelect('trees', `?id=eq.${encodeURIComponent(selectedTreeForAdopt.id)}&select=owner,adopt_status`);
         if (latestRows && latestRows[0] && latestRows[0].owner) {
           closeAdoptModal();
