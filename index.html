@@ -55,7 +55,7 @@
 
     <!-- 首頁大圖 Hero Section -->
     <section class="relative bg-earth-dark text-white overflow-hidden">
-      <div class="absolute inset-0 opacity-35 bg-[url('https://images.unsplash.com/photo-1590502593747-42a996133562?auto=format&fit=crop&w=1600&q=80')] bg-cover bg-center"></div>
+      <div class="absolute inset-0 opacity-35 bg-[url('./四季檸檬.png')] bg-cover bg-center"></div>
       <div class="relative max-w-6xl mx-auto px-4 py-16 md:py-24">
         <span class="inline-block bg-amber-500/90 text-stone-950 font-bold text-xs px-3 py-1 rounded-full mb-4">無子檸檬・四季檸檬・四季金桔・桑葚・其他果樹</span>
         <h2 class="text-3xl md:text-5xl font-bold leading-tight mb-4 max-w-2xl">在嘉義陽光與生物炭沃土中，<br/>認養一棵寫著你名字的果樹</h2>
@@ -163,7 +163,7 @@
         </div>
         <div>
           <label class="block text-sm font-bold text-earth-dark mb-1.5">2. 拍攝或挑選果樹照片（自動縮圖壓縮）</label>
-          <div class="w-full h-40 border-2 border-dashed border-earth-mid rounded-2xl bg-warm-cream overflow-hidden flex items-center justify-center mb-2">
+          <div class="w-full h-44 border-2 border-dashed border-earth-mid rounded-2xl bg-warm-cream overflow-hidden flex items-center justify-center mb-2">
             <img id="mobile-photo-preview" class="hidden w-full h-full object-cover" />
             <div id="mobile-photo-placeholder" class="text-center p-4">
               <div class="text-2xl mb-1">🍋</div>
@@ -412,88 +412,17 @@
     const DEFAULT_ANNUAL_FEE = 1800;
     const SPECIES_LIST = ['無子檸檬', '四季檸檬', '四季金桔', '桑葚', '其他'];
 
+    // 直接對應 GitHub 同資料夾內的統一規格 PNG 檔案
     const TREE_ASSET_FILES = {
-      '無子檸檬': '無子檸檬.png',
-      '四季檸檬': '四季檸檬.png',
-      '四季金桔': '四季金桔.png',
-      '桑葚': '桑葚.png',
-      '其他': '果樹.png'
+      '無子檸檬': './無子檸檬.png',
+      '四季檸檬': './四季檸檬.png',
+      '四季金桔': './四季金桔.png',
+      '桑葚': './桑葚.png',
+      '其他': './果樹.png'
     };
 
-    const RAW_TREE_IMAGES = {
-      '無子檸檬': 'https://i.imgur.com/8v1w8q8.jpeg',
-      '四季檸檬': 'https://i.imgur.com/7l2k9m3.jpeg',
-      '四季金桔': 'https://i.imgur.com/4p6n2v1.jpeg',
-      '桑葚': 'https://i.imgur.com/9x3c7b5.jpeg',
-      '其他': 'https://i.imgur.com/2m8r4t6.webp'
-    };
-
-    const normalizedImageCache = {};
-
-    function normalizeTreeImageToPng(species) {
-      if (normalizedImageCache[species]) {
-        return Promise.resolve(normalizedImageCache[species]);
-      }
-      const fallbackUrl = 'https://images.unsplash.com/photo-1590502593747-42a996133562?auto=format&fit=crop&w=1000&q=80';
-      const srcUrl = RAW_TREE_IMAGES[species] || fallbackUrl;
-
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => {
-          try {
-            const w = img.naturalWidth || img.width;
-            const h = img.naturalHeight || img.height;
-
-            let sx = 0, sy = 0, sw = w, sh = h;
-            if (species === '無子檸檬') {
-              sy = Math.round(h * 0.34);
-              sh = Math.max(10, h - sy);
-            } else if (species === '四季檸檬') {
-              sw = Math.round(w * 0.96);
-            }
-
-            const outW = 1000;
-            const outH = 620;
-            const canvas = document.createElement('canvas');
-            canvas.width = outW;
-            canvas.height = outH;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#F7F5EE';
-            ctx.fillRect(0, 0, outW, outH);
-
-            const scale = Math.max(outW / sw, outH / sh);
-            const drawW = sw * scale;
-            const drawH = sh * scale;
-            const dx = (outW - drawW) / 2;
-            const dy = (outH - drawH) / 2;
-            ctx.drawImage(img, sx, sy, sw, sh, dx, dy, drawW, drawH);
-
-            const pngDataUrl = canvas.toDataURL('image/png');
-            normalizedImageCache[species] = pngDataUrl;
-            resolve(pngDataUrl);
-          } catch (_) {
-            normalizedImageCache[species] = fallbackUrl;
-            resolve(fallbackUrl);
-          }
-        };
-        img.onerror = () => {
-          normalizedImageCache[species] = fallbackUrl;
-          resolve(fallbackUrl);
-        };
-        img.src = srcUrl;
-      });
-    }
-
-    async function getDefaultTreePhotoUrl(species, treeId) {
-      const targetSpecies = SPECIES_LIST.includes(species) ? species : '其他';
-      const normalizedPngDataUrl = await normalizeTreeImageToPng(targetSpecies);
-      if (normalizedPngDataUrl.startsWith('data:image/png')) {
-        const res = await fetch(normalizedPngDataUrl);
-        const blob = await res.blob();
-        return await uploadToCloudinary(blob, treeId);
-      }
-      return normalizedPngDataUrl;
+    function getDefaultTreePhotoPath(species) {
+      return TREE_ASSET_FILES[species] || './果樹.png';
     }
 
     let isStaffUnlocked = sessionStorage.getItem('kx_staff_unlocked') === '1';
@@ -607,12 +536,12 @@
     }
 
     async function uploadToCloudinary(blobOrUrl, treeId) {
-      if (typeof blobOrUrl === 'string' && blobOrUrl.startsWith('http')) {
+      if (typeof blobOrUrl === 'string' && (blobOrUrl.startsWith('http') || blobOrUrl.startsWith('./'))) {
         return blobOrUrl;
       }
       const safeFolderId = encodeURIComponent(String(treeId || 'general'));
       const formData = new FormData();
-      formData.append('file', blobOrUrl, `tree_${Date.now()}.png`);
+      formData.append('file', blobOrUrl, `tree_${Date.now()}.jpg`);
       formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
       formData.append('folder', `kunxiang/${safeFolderId}`);
 
@@ -635,29 +564,28 @@
       {
         id: '無子檸檬01', species: '無子檸檬', customName: '小綠寶', ageYear: 1, annualFee: 1800, owner: '王小明（內測）', adoptStatus: 'approved', isTestVip: true, fruitPref: '',
         logs: [
-          { date: '2026-11-20', photo: 'https://images.unsplash.com/photo-1587393855524-087f83d95bc9?auto=format&fit=crop&w=900&q=80', text: '施3號肥料(客製)，並混入自製稻殼炭改善根圈透氣。', isCustom: true },
-          { date: '2026-11-12', photo: 'https://images.unsplash.com/photo-1590502593747-42a996133562?auto=format&fit=crop&w=900&q=80', text: '株距中間深埋魚內臟補充天然有機養分，新芽抽出。', isCustom: false },
-          { date: '2026-11-01', photo: 'https://images.unsplash.com/photo-1582979512210-99b6a53386f9?auto=format&fit=crop&w=900&q=80', text: '定植完成與主幹立柱固定，例行灑水養根。', isCustom: false }
+          { date: '2026-11-20', photo: './無子檸檬.png', text: '施3號肥料(客製)，並混入自製稻殼炭改善根圈透氣。', isCustom: true },
+          { date: '2026-11-01', photo: './無子檸檬.png', text: '新定植建檔完成（無子檸檬.png）。', isCustom: false }
         ]
       },
       {
         id: '無子檸檬02', species: '無子檸檬', customName: '', ageYear: 1, annualFee: 1800, owner: '', adoptStatus: '', isTestVip: false, fruitPref: '',
-        logs: [{ date: '2026-11-15', photo: 'https://images.unsplash.com/photo-1590502593747-42a996133562?auto=format&fit=crop&w=900&q=80', text: '新定植建檔完成（無子檸檬.png）。', isCustom: false }]
+        logs: [{ date: '2026-11-15', photo: './無子檸檬.png', text: '新定植建檔完成（無子檸檬.png）。', isCustom: false }]
       },
       {
         id: '四季檸檬01', species: '四季檸檬', customName: '黃金樹', ageYear: 3, annualFee: 1800, owner: '林雅婷', adoptStatus: 'approved', isTestVip: false, fruitPref: '',
         logs: [
-          { date: '2026-11-17', photo: 'https://images.unsplash.com/photo-1582979512210-99b6a53386f9?auto=format&fit=crop&w=900&q=80', text: '保留部分果實轉黃(客製)，果皮香氣濃郁。', isCustom: true },
-          { date: '2026-11-05', photo: 'https://images.unsplash.com/photo-1587393855524-087f83d95bc9?auto=format&fit=crop&w=900&q=80', text: '新定植建檔完成（四季檸檬.png）。', isCustom: false }
+          { date: '2026-11-17', photo: './四季檸檬.png', text: '保留部分果實轉黃(客製)，果皮香氣濃郁。', isCustom: true },
+          { date: '2026-11-05', photo: './四季檸檬.png', text: '新定植建檔完成（四季檸檬.png）。', isCustom: false }
         ]
       },
       {
         id: '四季金桔01', species: '四季金桔', customName: '', ageYear: 2, annualFee: 1800, owner: '', adoptStatus: '', isTestVip: false, fruitPref: '',
-        logs: [{ date: '2026-11-12', photo: 'https://images.unsplash.com/photo-1611080626919-7cf5a9dbab5b?auto=format&fit=crop&w=900&q=80', text: '新定植建檔完成（四季金桔.png）。', isCustom: false }]
+        logs: [{ date: '2026-11-12', photo: './四季金桔.png', text: '新定植建檔完成（四季金桔.png）。', isCustom: false }]
       },
       {
         id: '桑葚01', species: '桑葚', customName: '', ageYear: 1, annualFee: 1800, owner: '', adoptStatus: '', isTestVip: false, fruitPref: '',
-        logs: [{ date: '2026-11-14', photo: 'https://images.unsplash.com/photo-1596591606975-97ee5cef3a1e?auto=format&fit=crop&w=900&q=80', text: '新定植建檔完成（桑葚.png）。', isCustom: false }]
+        logs: [{ date: '2026-11-14', photo: './桑葚.png', text: '新定植建檔完成（桑葚.png）。', isCustom: false }]
       }
     ];
 
@@ -733,6 +661,8 @@
         const logRows = await sbSelect('tree_logs', '?select=*&order=id.desc');
 
         trees = (treeRows || []).map(r => {
+          const species = r.species || '無子檸檬';
+          const fallbackPhoto = getDefaultTreePhotoPath(species);
           const treeLogs = (logRows || [])
             .filter(l => l.tree_id === r.id && l.photo_url)
             .map(l => ({
@@ -745,7 +675,7 @@
 
           return {
             id: r.id,
-            species: r.species || '無子檸檬',
+            species,
             customName: r.custom_name || '',
             ageYear: r.age_year || 1,
             annualFee: typeof r.annual_fee === 'number' ? r.annual_fee : DEFAULT_ANNUAL_FEE,
@@ -756,7 +686,7 @@
             logs: treeLogs.length > 0 ? treeLogs : [{
               id: null,
               date: new Date().toISOString().split('T')[0],
-              photo: 'https://images.unsplash.com/photo-1590502593747-42a996133562?auto=format&fit=crop&w=900&q=80',
+              photo: fallbackPhoto,
               text: '新定植建檔完成。',
               isCustom: false
             }]
@@ -790,6 +720,7 @@
         const displayName = isApproved && tree.customName ? `${tree.customName}（${tree.id}）` : tree.id;
         const fee = getTreeFee(tree);
         const latestLog = tree.logs[0];
+        const fallbackImg = getDefaultTreePhotoPath(tree.species);
 
         let badgeHtml = '<span class="absolute top-2 left-2 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white">開放認養</span>';
         let actionBtnHtml = `<button type="button" onclick="openAdoptModal('${tree.id}')" class="py-1.5 px-1 bg-earth-dark hover:bg-earth-mid text-white rounded text-xs font-bold transition">申請認養</button>`;
@@ -808,8 +739,8 @@
         card.className = 'bg-white rounded-2xl border border-earth overflow-hidden shadow-sm flex flex-col justify-between';
         card.innerHTML = `
           <div>
-            <div class="relative h-40 bg-stone-200 cursor-pointer" onclick="openHistoryModal('${tree.id}')">
-              <img src="${latestLog.photo}" class="w-full h-full object-cover hover:scale-105 transition duration-300" />
+            <div class="relative aspect-[16/10] w-full bg-warm-cream overflow-hidden cursor-pointer" onclick="openHistoryModal('${tree.id}')">
+              <img src="${latestLog.photo}" onerror="this.onerror=null;this.src='${fallbackImg}';" class="w-full h-full object-cover object-center hover:scale-105 transition duration-300" />
               ${badgeHtml}
               <span class="absolute bottom-2 right-2 bg-black/65 text-white text-[10px] px-2 py-0.5 rounded">共 ${tree.logs.length} 筆紀錄</span>
             </div>
@@ -942,7 +873,11 @@
       if (!activeHistoryTree) return;
       const logs = activeHistoryTree.logs;
       const currentLog = logs[activeLogIndex];
-      document.getElementById('hist-main-photo').src = currentLog.photo;
+      const fallbackImg = getDefaultTreePhotoPath(activeHistoryTree.species);
+      const mainImg = document.getElementById('hist-main-photo');
+      mainImg.onerror = function() { this.onerror = null; this.src = fallbackImg; };
+      mainImg.src = currentLog.photo;
+
       document.getElementById('hist-photo-counter').textContent = `${activeLogIndex + 1} / ${logs.length}`;
       document.getElementById('hist-photo-date').textContent = currentLog.date;
 
@@ -1029,13 +964,15 @@
     }
 
     function useSamplePhoto() {
+      const id = document.getElementById('mobile-tree-select').value;
+      const t = trees.find(x => x.id === id);
       currentMobilePhotoBlob = null;
-      currentMobilePhotoUrl = 'https://images.unsplash.com/photo-1587393855524-087f83d95bc9?auto=format&fit=crop&w=900&q=80';
+      currentMobilePhotoUrl = getDefaultTreePhotoPath(t ? t.species : '其他');
       const img = document.getElementById('mobile-photo-preview');
       img.src = currentMobilePhotoUrl;
       img.classList.remove('hidden');
       document.getElementById('mobile-photo-placeholder').classList.add('hidden');
-      document.getElementById('mobile-photo-info').textContent = '已帶入田間測試照片';
+      document.getElementById('mobile-photo-info').textContent = `已帶入預設圖片（${currentMobilePhotoUrl}）`;
     }
 
     async function submitFieldLog() {
@@ -1217,10 +1154,10 @@
       const sameSpeciesTrees = trees.filter(t => t.species === species);
       const nextNum = sameSpeciesTrees.length + 1;
       const id = `${species}${nextNum < 10 ? `0${nextNum}` : nextNum}`;
-      const assetFileName = TREE_ASSET_FILES[species] || '果樹.png';
+      const photoPath = getDefaultTreePhotoPath(species);
+      const fileName = photoPath.replace('./', '');
 
       try {
-        const photoUrl = await getDefaultTreePhotoUrl(species, id);
         await sbInsert('trees', {
           id,
           species,
@@ -1234,13 +1171,13 @@
         });
 
         const logText = species === '其他'
-          ? `新定植建檔完成（種類：${otherKindLabel}，圖片：${assetFileName}）。`
-          : `新定植建檔完成（圖片：${assetFileName}）。`;
+          ? `新定植建檔完成（種類：${otherKindLabel}，圖片：${fileName}）。`
+          : `新定植建檔完成（圖片：${fileName}）。`;
 
         await sbInsert('tree_logs', {
           tree_id: id,
           log_date: new Date().toISOString().split('T')[0],
-          photo_url: photoUrl,
+          photo_url: photoPath,
           log_text: logText,
           is_custom: false
         });
@@ -1326,11 +1263,12 @@
       const tree = trees.find(t => t.id === managingTreeId);
       const container = document.getElementById('manage-logs-list');
       if (!tree || !container) return;
+      const fallbackImg = getDefaultTreePhotoPath(tree.species);
 
       container.innerHTML = tree.logs.map(log => `
         <div class="flex items-center justify-between gap-3 p-2.5 rounded-xl border bg-warm-cream">
           <div class="flex items-center gap-3 min-w-0">
-            <img src="${log.photo}" class="w-14 h-14 rounded-lg object-cover shrink-0 bg-stone-200" />
+            <img src="${log.photo}" onerror="this.onerror=null;this.src='${fallbackImg}';" class="w-14 h-14 rounded-lg object-cover shrink-0 bg-stone-200" />
             <div class="min-w-0">
               <div class="font-bold text-earth-dark">${log.date} ${log.isCustom ? '<span class="text-amber-700">[客製]</span>' : ''}</div>
               <p class="text-stone-700 truncate">${log.text}</p>
